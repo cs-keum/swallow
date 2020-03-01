@@ -1,0 +1,13 @@
+beautifulsoup4
+numpy
+pandas
+requests
+sqlalchemy
+Flask
+injector
+connexion
+Flask-Injector
+flask_sqlalchemy
+fastavro
+elasticsearch
+boto
