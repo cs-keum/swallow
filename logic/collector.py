@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import exists
 import time
 from orm import model
+
+from data import dart
 from data import krx
 from data import nfinance
 
@@ -69,5 +71,30 @@ def krx_industry_type(db: SQLAlchemy):
             db.session.commit()
         except:
             pass
+
+    return
+
+
+def dart_financial_data(db: SQLAlchemy):
+    result = common.stock_codes(db)
+    bsns_year = datetime.today().year
+    for item in result:
+        years_period = 0
+        while years_period <= 5:
+            year = bsns_year - years_period
+
+            exist_data = db.session.query(exists().where(model.FinancialData.corp_code == item.corp_code)).scalar()
+
+            if exist_data:
+
+                years_period += 1
+                continue
+
+            df = dart.financial_data(item.corp_code, year, "11011")
+            if df is not None:
+                db.session.bulk_insert_mappings(model.FinancialData, df.to_dict(orient="records"))
+                db.session.commit()
+                print("Success to get data", item.stock_code, item.stock_name, year)
+            years_period += 1
 
     return

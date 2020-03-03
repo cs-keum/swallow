@@ -2,6 +2,7 @@
 import logging
 import logging.handlers
 from logging.handlers import RotatingFileHandler
+import sys
 import os
 import configparser
 
@@ -9,6 +10,9 @@ from injector import Module, Injector, inject, singleton
 from flask import Flask, Request, jsonify, render_template
 from flask_injector import FlaskInjector
 from flask_sqlalchemy import SQLAlchemy
+
+from hts import kiwoom
+
 
 from service import stock
 from service import crawler
@@ -73,17 +77,19 @@ def main():
 
     FlaskInjector(app=app, injector=injector)
 
-    app.run(port=9090, debug=True)
+    # app.run(port=9090, debug=True)
 
-    # client = app.test_client()
-
-    # response = client.get('/crawling/krx/investratio')
-    # response = client.get('/stock/recommend')
-    # response = client.get('/stock/analyze/029460')
+    client = app.test_client()
 
     # response = client.get('/crawling/nfinance/companyperformance')
+    # response = client.get('/crawling/dart/financialdata')
+    # response = client.get('/crawling/krx/investratio')
 
-    # response = client.get('/company/updatesector')
+    # response = client.get('/stock/recommend')
+    # response = client.get('/stock/analyze/value/029460')
+    response = client.get('/stock/analyze/risk/950130')
+
+# response = client.get('/company/updatesector')
 
 
 if __name__ == '__main__':

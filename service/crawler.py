@@ -34,6 +34,15 @@ def configure(app):
         response.status = '201 CREATED'
         return response
 
+    @app.route('/crawling/dart/financialdata')
+    def dart_financial_data(db: SQLAlchemy):
+
+        result = collector.dart_financial_data(db)
+
+        response = jsonify(status='OK')
+        response.status = '201 CREATED'
+        return response
+
     @app.route('/test2')
     def test2():
 

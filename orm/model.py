@@ -112,78 +112,134 @@ class CompanyPerformance(Base):
         self.dividend_payout_ratio = dividend_payout_ratio
 
 
-class InvestRatio(Base):
-    __tablename__ = 'invest_ratio'
+class FinancialData(Base):
+    __tablename__ = 'financial_data'
     __table_args__ = {'mysql_collate': 'utf8_general_ci'}
 
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
-    tdate = Column(Date)
-    stock_code = Column(String(50))
-    stock_name = Column(String(50))
-    managed = Column(String(10))
-    price = Column(Integer)
-    eps = Column(Float)
-    per = Column(Float)
-    bps = Column(Float)
-    pbr = Column(Float)
-    roe = Column(Float)
-    dividend = Column(Integer)
-    dividend_yield = Column(Integer)
+    rcept_no = Column(String(50))
+    reprt_code = Column(String(5))
+    bsns_year = Column(String(10))
+    corp_code = Column(String(8))
+    stock_code = Column(String(6))
+    fs_div = Column(String(6))
+    fs_nm = Column(String(20))
+    sj_div = Column(String(6))
+    sj_nm = Column(String(20))
+    account_nm = Column(String(20))
+    thstrm_nm = Column(String(30))
+    thstrm_dt = Column(String(30))
+    thstrm_amount = Column(String(50))
+    frmtrm_nm = Column(String(30))
+    frmtrm_dt = Column(String(30))
+    frmtrm_amount = Column(String(50))
+    ord = Column(String(5))
+    thstrm_add_amount = Column(String(50))
+    frmtrm_add_amount = Column(String(50))
+    bfefrmtrm_nm = Column(String(30))
+    bfefrmtrm_dt = Column(String(30))
+    bfefrmtrm_amount = Column(String(50))
 
-    def __init__(self, tdate, stock_code, stock_name, managed, price, eps, per, bps, pbr, roe, dividend,
-                 dividend_yield):
-        self.tdate = tdate
+    def __init__(self, rcept_no=None, reprt_code=None, bsns_year=None, corp_code=None, stock_code=None, fs_div=None,
+                 fs_nm=None, sj_div=None, sj_nm=None, account_nm=None, thstrm_nm=None, thstrm_dt=None,
+                 thstrm_amount=None, frmtrm_nm=None, frmtrm_dt=None, frmtrm_amount=None, ord=None,
+                 thstrm_add_amount=None, frmtrm_add_amount=None, bfefrmtrm_nm=None, bfefrmtrm_dt=None,
+                 bfefrmtrm_amount=None):
+        self.rcept_no = rcept_no
+        self.reprt_code = reprt_code
+        self.bsns_year = bsns_year
+        self.corp_code = corp_code
         self.stock_code = stock_code
-        self.stock_name = stock_name
-        self.managed = managed
-        self.price = price
-        self.eps = eps
-        self.per = per
-        self.bps = bps
-        self.pbr = pbr
-        self.roe = roe
-        self.dividend = dividend
-        self.dividend_yield = dividend_yield
+        self.fs_div = fs_div
+        self.fs_nm = fs_nm
+        self.sj_div = sj_div
+        self.sj_nm = sj_nm
+        self.account_nm = account_nm
+        self.thstrm_nm = thstrm_nm
+        self.thstrm_dt = thstrm_dt
+        self.thstrm_amount = thstrm_amount
+        self.frmtrm_nm = frmtrm_nm
+        self.frmtrm_dt = frmtrm_dt
+        self.frmtrm_amount = frmtrm_amount
+        self.ord = ord
+        self.thstrm_add_amount = thstrm_add_amount
+        self.frmtrm_add_amount = frmtrm_add_amount
+        self.bfefrmtrm_nm = bfefrmtrm_nm
+        self.bfefrmtrm_dt = bfefrmtrm_dt
+        self.bfefrmtrm_amount = bfefrmtrm_amount
 
-    def as_dict(self):
-        return {x.name: getattr(self, x.name) for x in self.__table__.columns}
 
+    class InvestRatio(Base):
+        __tablename__ = 'invest_ratio'
+        __table_args__ = {'mysql_collate': 'utf8_general_ci'}
 
-class StockDefinition(Base):
-    __tablename__ = 'stock_definition'
-    __table_args__ = {'mysql_collate': 'utf8_general_ci'}
+        id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
+        tdate = Column(Date)
+        stock_code = Column(String(50))
+        stock_name = Column(String(50))
+        managed = Column(String(10))
+        price = Column(Integer)
+        eps = Column(Float)
+        per = Column(Float)
+        bps = Column(Float)
+        pbr = Column(Float)
+        roe = Column(Float)
+        dividend = Column(Integer)
+        dividend_yield = Column(Integer)
 
-    id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
-    creation_datetime = Column(DateTime)
-    stock_code = Column(String(50))
-    stock_name = Column(String(50))
-    stock_sector = Column(String(50))
-    capital_value = Column(Integer)
-    listed_stocks = Column(Integer)
-    excess_profit = Column(Integer)
-    price = Column(Integer)
-    buy_price = Column(Integer)
-    adequate_price = Column(Integer)
-    excess_price = Column(Integer)
-    roe = Column(Float)
-    roes = Column(String(150))
+        def __init__(self, tdate, stock_code, stock_name, managed, price, eps, per, bps, pbr, roe, dividend,
+                     dividend_yield):
+            self.tdate = tdate
+            self.stock_code = stock_code
+            self.stock_name = stock_name
+            self.managed = managed
+            self.price = price
+            self.eps = eps
+            self.per = per
+            self.bps = bps
+            self.pbr = pbr
+            self.roe = roe
+            self.dividend = dividend
+            self.dividend_yield = dividend_yield
 
-    def __init__(self, creation_datetime=None, stock_code=None, stock_name=None, stock_sector=None, capital_value=0,
-                 listed_stocks=0, excess_profit=0, price=0, buy_price=0, adequate_price=0, excess_price=0, roe=0,
-                 roes={}):
-        self.creation_datetime = creation_datetime
-        self.stock_code = stock_code
-        self.stock_name = stock_name
-        self.stock_sector = stock_sector
-        self.capital_value = capital_value
-        self.listed_stocks = listed_stocks
-        self.excess_profit = excess_profit
-        self.price = price
-        self.buy_price = buy_price
-        self.adequate_price = adequate_price
-        self.excess_price = excess_price
-        self.roe = roe
-        self.roes = roes
+        def as_dict(self):
+            return {x.name: getattr(self, x.name) for x in self.__table__.columns}
 
-    def as_dict(self):
-        return {x.name: getattr(self, x.name) for x in self.__table__.columns}
+    class StockDefinition(Base):
+        __tablename__ = 'stock_definition'
+        __table_args__ = {'mysql_collate': 'utf8_general_ci'}
+
+        id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
+        creation_datetime = Column(DateTime)
+        stock_code = Column(String(50))
+        stock_name = Column(String(50))
+        stock_sector = Column(String(50))
+        capital_value = Column(Integer)
+        listed_stocks = Column(Integer)
+        excess_profit = Column(Integer)
+        price = Column(Integer)
+        buy_price = Column(Integer)
+        adequate_price = Column(Integer)
+        excess_price = Column(Integer)
+        roe = Column(Float)
+        roes = Column(String(150))
+
+        def __init__(self, creation_datetime=None, stock_code=None, stock_name=None, stock_sector=None, capital_value=0,
+                     listed_stocks=0, excess_profit=0, price=0, buy_price=0, adequate_price=0, excess_price=0, roe=0,
+                     roes={}):
+            self.creation_datetime = creation_datetime
+            self.stock_code = stock_code
+            self.stock_name = stock_name
+            self.stock_sector = stock_sector
+            self.capital_value = capital_value
+            self.listed_stocks = listed_stocks
+            self.excess_profit = excess_profit
+            self.price = price
+            self.buy_price = buy_price
+            self.adequate_price = adequate_price
+            self.excess_price = excess_price
+            self.roe = roe
+            self.roes = roes
+
+        def as_dict(self):
+            return {x.name: getattr(self, x.name) for x in self.__table__.columns}

@@ -10,7 +10,6 @@ import operator
 from logic import common
 from orm import model
 
-
 earning_rate = 8.0
 table = pd.read_excel('./excel/compound_ten_years.xlsx', index_col=0)
 conn = create_engine("mysql+pymysql://root:" + "root" + "@127.0.0.1:3306/marketdata?charset=utf8",
@@ -21,6 +20,7 @@ def current_stock(db, code):
     item = db.session.query(model.InvestRatio).filter(
         model.InvestRatio.stock_code == code).order_by(
         model.InvestRatio.id.desc()).first()
+
 
     return item
 
@@ -110,7 +110,7 @@ def roe_trend(roe_dic, filter_earning_rate):
 
         if before_roe > 0:
 
-            # if before_roe < cur_roe * 0.5 or before_roe > cur_roe * 0.5:
+            # if before_roe < cur_roe * 1.5 or before_roe > cur_roe * 1.5:
             #     return -1
 
             if cur_roe < before_roe:
@@ -158,7 +158,6 @@ def define_roe(trend, roe_dic, follow_trend):
 
 
 def xbrl_capital_value(code):
-
     sql = "SELECT equityattributabletoownersofparent FROM xbrl WHERE xbrl.stock_code='" + code + "' AND xbrl.equityattributabletoownersofparent IS NOT NULL ORDER BY xbrl.rcept_dt DESC LIMIT 1;"
     df = pd.read_sql_query(sql, conn)
 
@@ -180,8 +179,13 @@ def listed_stocks(code):
 
 def define_value(db, code, _roe, roe_dic):
     item = current_stock(db, code)
-    price = item.price
-    name = item.stock_name
+    # price = 0
+    # name = ''
+    try:
+        price = item.price
+        name = item.stock_name
+    except:
+        return None
 
     capitalValue = xbrl_capital_value(code)
 
@@ -229,8 +233,8 @@ def define_value(db, code, _roe, roe_dic):
     else:
         sector = df.iloc[0][0]
 
-    stock_definition = model.StockDefinition(datetime.today(), code, name, sector, capitalValue, listedStocks,
-                                             excessProfit, price, buyingStockValue, adequateStockValue,
+    stock_definition = model.StockDefinition(datetime.today().strftime('%Y-%m-%d'), code, name, sector, capitalValue,
+                                             listedStocks, excessProfit, price, buyingStockValue, adequateStockValue,
                                              excessStockValue, _roe, roe_dic)
     return stock_definition
 
@@ -255,8 +259,11 @@ def recommend_stocks(db: SQLAlchemy):
             continue
 
         if stock_definition.price < stock_definition.buy_price:
-            print(stock_definition.as_dict())
+            # print(stock_definition.as_dict())
             stocks.append(stock_definition)
+
+    sorted_stocks = sorted(stocks, key=lambda stock: stock.roe)
+    sorted_stocks.reverse()
 
     return stocks
 
