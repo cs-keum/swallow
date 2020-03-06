@@ -1,6 +1,7 @@
 import json
 
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import exists
 
 from flask import jsonify, render_template
 from orm import model
@@ -10,6 +11,9 @@ from flask import make_response
 from logic import common
 from logic import finder
 from logic import filter
+from utils import encoder
+
+from logic import collector
 
 from hts import kiwoom
 
@@ -32,14 +36,30 @@ def configure(app):
 
     @app.route('/stock/analyze/risk/<code>')
     def analyze_risk(code, db: SQLAlchemy):
+
+        # risk_results = filter.analyze_business_loss_risk(db, '009730')
+
         result = common.stock_codes(db)
         for item in result:
             if item.corp_cls == 'N':
                 continue
             code = item.stock_code
-            revenue_risk_result = filter.analyze_revenue_risk(db, code)
-            business_ross_risk_result = filter.analyze_business_ross_risk(db, code)
-            print("code : ", code, revenue_risk_result, business_ross_risk_result)
+
+            # risk_results = filter.analyze_revenue_risk(db, code)
+            # risk_results = filter.analyze_business_loss_risk(db, code)
+            # risk_results = filter.analyze_operating_loss_risk(db, code)
+            risk_results = filter.analyze_capital_impairment_risk(db, code)
+
+            for result in risk_results:
+                if result.is_normal is not None and not result.is_normal:
+                    print(result.company.stock_code, result.company.stock_name, result.risk_type, result.year,
+                          result.is_normal, result.evidence)
+
+                # if result.is_normal is None:
+                #     if db.session.query(exists().where(model.FinancialData.corp_code == item.corp_code).where(
+                #             model.FinancialData.reprt_code == '11011')).scalar():
+                #         print(result.company.stock_code, result.company.stock_name, result.risk_type, result.year,
+                #               result.is_normal, result.evidence)
 
         response = jsonify(status='OK')
         response.status = '201 CREATED'
