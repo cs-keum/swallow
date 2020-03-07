@@ -21,7 +21,6 @@ def current_stock(db, code):
         model.InvestRatio.stock_code == code).order_by(
         model.InvestRatio.id.desc()).first()
 
-
     return item
 
 
@@ -187,9 +186,11 @@ def define_value(db, code, _roe, roe_dic):
     except:
         return None
 
-    capitalValue = xbrl_capital_value(code)
+    # capitalValue = xbrl_capital_value(code)
+    company_item = common.company(db, code)
+    capitalValue = common.equity_owners_value(db, company_item, '2019', True)
 
-    if capitalValue < 0:
+    if capitalValue is None:
         return None
 
     listedStocks = listed_stocks(code)

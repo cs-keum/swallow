@@ -78,16 +78,15 @@ def main():
     FlaskInjector(app=app, injector=injector)
 
     # app.run(port=9090, debug=True)
-
     client = app.test_client()
 
     # response = client.get('/crawling/nfinance/companyperformance')
     # response = client.get('/crawling/dart/financialdata')
     # response = client.get('/crawling/krx/investratio')
 
-    # response = client.get('/stock/recommend')
+    response = client.get('/stock/recommend')
     # response = client.get('/stock/analyze/value/029460')
-    response = client.get('/stock/analyze/risk/950130')
+    # response = client.get('/stock/analyze/risk/950130')
 
 # response = client.get('/company/updatesector')
 
