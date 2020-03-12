@@ -89,7 +89,7 @@ def analyze_revenue_risk(db: SQLAlchemy, company_item: model.Company, results: [
     elif company_item.corp_cls == 'K':
         standard_amount = 3000000000  # 30억
 
-    result = common.revenue(db, company_item)
+    result = common.revenue(db, company_item, '11011')
     result_count = result.count()
 
     if result_count == 0:
@@ -124,13 +124,13 @@ def analyze_revenue_risk(db: SQLAlchemy, company_item: model.Company, results: [
 def analyze_business_loss_risk(db: SQLAlchemy, company_item: model.Company, results: []):
     if company_item.corp_cls == 'Y':
         risk_result = RiskResult(risk_type=Risk.BUSINESS_LOSS)
-        risk_result.is_normal = True
+        risk_result.is_normal = None
         risk_result.evidence.append('Not applicable')
         results.append(risk_result)
 
     elif company_item.corp_cls == 'K':
 
-        result = common.equity(db, company_item)
+        result = common.equity(db, company_item, '11011')
 
         result_count = result.count()
         if result_count == 0:
@@ -151,7 +151,8 @@ def analyze_business_loss_risk(db: SQLAlchemy, company_item: model.Company, resu
                         results.append(risk_result)
                         continue
 
-                    profit_loss_before_tax_value = common.profit_loss_before_tax_value(db, company_item, item.bsns_year)
+                    profit_loss_before_tax_value = common.profit_loss_before_tax_value(db, company_item, item.bsns_year,
+                                                                                       '11011')
 
                     if profit_loss_before_tax_value is None:
                         risk_result = RiskResult(risk_type=Risk.BUSINESS_LOSS)
@@ -164,9 +165,6 @@ def analyze_business_loss_risk(db: SQLAlchemy, company_item: model.Company, resu
                         risk_result.evidence.append(('profit_loss_before_tax_value', profit_loss_before_tax_value))
                         risk_result.evidence.append(('equity', equity))
 
-                    if profit_loss_before_tax_value > 0:
-                        risk_result.is_normal = True
-                    else:
                         if equity * 0.5 < profit_loss_before_tax_value * -1 and profit_loss_before_tax_value * -1 > 1000000000:
                             risk_result.is_normal = False
                         else:
@@ -180,13 +178,13 @@ def analyze_business_loss_risk(db: SQLAlchemy, company_item: model.Company, resu
 def analyze_operating_loss_risk(db: SQLAlchemy, company_item: model.Company, results: []):
     if company_item.corp_cls == 'Y':
         risk_result = RiskResult(risk_type=Risk.OPERATING_LOSS)
-        risk_result.is_normal = True
+        risk_result.is_normal = None
         risk_result.evidence.append('Not applicable')
         results.append(risk_result)
 
     elif company_item.corp_cls == 'K':
 
-        result = common.operating_income_loss(db, company_item)
+        result = common.operating_income_loss(db, company_item, '11011')
         result_count = result.count()
         if result_count == 0:
             risk_result = RiskResult(risk_type=Risk.OPERATING_LOSS)
@@ -219,7 +217,7 @@ def analyze_operating_loss_risk(db: SQLAlchemy, company_item: model.Company, res
 
 def analyze_capital_impairment_risk(db: SQLAlchemy, company_item: model.Company, results: []):
     # 자본금
-    result = common.issued_capital(db, company_item)
+    result = common.issued_capital(db, company_item, '11011')
     result_count = result.count()
     if result_count == 0:
         risk_result = RiskResult(risk_type=Risk.CAPITAL_IMPAIRMENT)
@@ -237,7 +235,7 @@ def analyze_capital_impairment_risk(db: SQLAlchemy, company_item: model.Company,
                 results.append(risk_result)
                 continue
 
-            equity_owners_value = common.equity_owners_value(db, company_item, capital_item.bsns_year, False)
+            equity_owners_value = common.equity_owners_value(db, company_item, capital_item.bsns_year, '11011')
             if equity_owners_value is None:
                 risk_result = RiskResult(risk_type=Risk.CAPITAL_IMPAIRMENT)
                 risk_result.data_supported = False

@@ -81,5 +81,5 @@ def company_performance(stock_code):
 
     all_df = annual_df.append(quarter_df)
     all_df = all_df.replace(r'^\s*$', 0, regex=True)
-    all_df = all_df.replace(r'[-]', 0, regex=True)
+    all_df = all_df.replace(r'^-$', 0, regex=True)
     return all_df

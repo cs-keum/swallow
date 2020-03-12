@@ -75,77 +75,27 @@ def krx_industry_type(db: SQLAlchemy):
     return
 
 
-def dart_financial_data(db: SQLAlchemy):
+def dart_financial_data(db: SQLAlchemy, initial):
     result = common.stock_codes(db)
 
     for item in result:
 
-        request_dart_financial_data(db, item)
+        if not initial and not db.session.query(
+                exists().where(model.FinancialData.corp_code == item.corp_code)).scalar():
+            continue
 
-        # # 사업보고서
-        # years_period = 0
-        #
-        # while years_period <= 5:
-        #     year = bsns_year - years_period
-        #
-        #     reprt_code = '11011'
-        #     exist_data = db.session.query(exists().where(model.FinancialData.corp_code == item.corp_code).where(
-        #         model.FinancialData.bsns_year == year).where(model.FinancialData.reprt_code == reprt_code)).scalar()
-        #
-        #     if exist_data:
-        #         years_period += 1
-        #         continue
-        #
-        #     df = dart.financial_data(item.corp_code, year, reprt_code)
-        #     if df is not None:
-        #         db.session.bulk_insert_mappings(model.FinancialData, df.to_dict(orient="records"))
-        #         db.session.commit()
-        #         print("Success to get data", item.stock_code, item.stock_name, year)
-        #
-        #     years_period += 1
-        #
-        # # 최근 분기보고서
-        # if datetime.today().month < 4:
-        #     years_period = 1
-        # else:
-        #     years_period = 0
-        #
-        # data_exists = False
-        # while years_period <= 5:
-        #     year = bsns_year - years_period
-        #
-        #     reprt_code_list = ['11014','11012','11013']
-        #     for reprt_code in reprt_code_list:
-        #         exist_data = db.session.query(exists().where(model.FinancialData.corp_code == item.corp_code).where(
-        #             model.FinancialData.bsns_year == year).where(model.FinancialData.reprt_code == reprt_code)).scalar()
-        #
-        #         if exist_data:
-        #             data_exists = True
-        #             break
-        #
-        #         df = dart.financial_data(item.corp_code, year, reprt_code)
-        #         if df is not None:
-        #             db.session.bulk_insert_mappings(model.FinancialData, df.to_dict(orient="records"))
-        #             db.session.commit()
-        #             print("Success to get data", item.stock_code, item.stock_name, year, reprt_code)
-        #             data_exists = True
-        #             break
-        #
-        #     if data_exists:
-        #         break;
-        #
-        #     years_period += 1
+        request_dart_annual_financial_data(db, item)
 
     return
 
 
-def request_dart_financial_data(db: SQLAlchemy, item: model.Company):
-
-    bsns_year = datetime.today().year
+def request_dart_annual_financial_data(db: SQLAlchemy, item: model.Company):
+    bsns_year = datetime.today().year - 1
 
     # 사업보고서
     years_period = 0
 
+    exists_annual_data = False
     while years_period <= 5:
         year = bsns_year - years_period
 
@@ -157,13 +107,23 @@ def request_dart_financial_data(db: SQLAlchemy, item: model.Company):
             years_period += 1
             continue
 
-        df = dart.financial_data(item.corp_code, year, reprt_code)
+        df = dart.financial_data(item.corp_code, year, reprt_code, 'CFS')
+        if df is None:
+            df = dart.financial_data(item.corp_code, year, reprt_code, 'OFS')
+
         if df is not None:
             db.session.bulk_insert_mappings(model.FinancialData, df.to_dict(orient="records"))
             db.session.commit()
             print("Success to get data", item.stock_code, item.stock_name, year)
+            exists_annual_data = True
 
         years_period += 1
+
+    return exists_annual_data
+
+
+def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company):
+    bsns_year = datetime.today().year
 
     # 최근 분기보고서
     if datetime.today().month < 4:
@@ -175,7 +135,7 @@ def request_dart_financial_data(db: SQLAlchemy, item: model.Company):
     while years_period <= 5:
         year = bsns_year - years_period
 
-        reprt_code_list = ['11014','11012','11013']
+        reprt_code_list = ['11014', '11012', '11013']
         for reprt_code in reprt_code_list:
             exist_data = db.session.query(exists().where(model.FinancialData.corp_code == item.corp_code).where(
                 model.FinancialData.bsns_year == year).where(model.FinancialData.reprt_code == reprt_code)).scalar()
@@ -184,7 +144,10 @@ def request_dart_financial_data(db: SQLAlchemy, item: model.Company):
                 data_exists = True
                 break
 
-            df = dart.financial_data(item.corp_code, year, reprt_code)
+            df = dart.financial_data(item.corp_code, year, reprt_code, 'CFS')
+            if df is None:
+                df = dart.financial_data(item.corp_code, year, reprt_code, 'OFS')
+
             if df is not None:
                 db.session.bulk_insert_mappings(model.FinancialData, df.to_dict(orient="records"))
                 db.session.commit()

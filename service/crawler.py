@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 
-from flask import Flask, Request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template
 
 from logic import collector
 
@@ -37,7 +37,13 @@ def configure(app):
     @app.route('/crawling/dart/financialdata')
     def dart_financial_data(db: SQLAlchemy):
 
-        result = collector.dart_financial_data(db)
+        initial = request.args.get('initial')
+        if initial is None:
+            initial = False
+        else:
+            initial = True
+
+        result = collector.dart_financial_data(db, initial)
 
         response = jsonify(status='OK')
         response.status = '201 CREATED'

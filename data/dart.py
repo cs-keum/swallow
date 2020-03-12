@@ -4,14 +4,14 @@ import numpy as np
 import json
 
 
-def financial_data(corpCode, bsns_year, reprt_code):
+def financial_data(corpCode, bsns_year, reprt_code, fs_div):
     req_url = 'https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json'
     params = {
-        'crtfc_key': 'e97f75b01939a7d21c9226287e9b9a7d46cb4116', #25d08389cf2f30201056ef7d4e5627539b55d784
+        'crtfc_key': '25d08389cf2f30201056ef7d4e5627539b55d784', #25d08389cf2f30201056ef7d4e5627539b55d784 e97f75b01939a7d21c9226287e9b9a7d46cb4116
         'corp_code': corpCode,
         'bsns_year': str(bsns_year),
         'reprt_code': reprt_code,
-        'fs_div': 'CFS',
+        'fs_div': fs_div,
     }
     response = requests.get(url=req_url, params=params, headers={'User-Agent': 'swallow'})
     content_dic = json.loads(response.content)

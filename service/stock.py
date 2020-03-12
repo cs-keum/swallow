@@ -2,6 +2,7 @@ import json
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import exists
+from flask import request
 
 from flask import jsonify, render_template
 from orm import model
@@ -21,18 +22,58 @@ from hts import kiwoom
 def configure(app):
     @app.route('/stock/recommend')
     def recommend_stocks(db: SQLAlchemy):
-        stocks = finder.recommend_stocks(db)
-        for stock in stocks:
-            print(stock.as_dict())
 
-        return render_template('index.html')
+        volatility = request.args.get('volatility')
+        if volatility is not None:
+            steady_roe = True
+        else:
+            steady_roe = False
+            volatility = 0
+
+        yield_rate = request.args.get('yield_rate')
+        if yield_rate is None:
+            yield_rate = 8
+
+        stocks = finder.recommend_stocks(db, steady_roe, int(volatility), float(yield_rate))
+        return render_template('recommend.html',
+                               stocks_recommended=json.dumps(stocks, indent=4, cls=encoder.JSONEncoder,
+                                                             ensure_ascii=False))
 
     @app.route('/stock/analyze/value/<code>')
     def analyze_stock(code, db: SQLAlchemy):
-        stock = finder.analyze_stock(db, code)
-        # print(stock.as_dict())
-        response = make_response(json.dumps(stock, indent=4, cls=encoder.JSONEncoder, ensure_ascii=False))
-        inspector.status = '200'
+        stocks = []
+
+        volatility = request.args.get('volatility')
+        if volatility is None:
+            volatility = 0
+
+        yield_rate = request.args.get('yield_rate')
+        if yield_rate is None:
+            yield_rate = 8
+
+        stock = finder.analyze_stock(db, code, int(volatility), float(yield_rate))
+        stocks.append(stock)
+        return render_template('recommend.html',
+                               stocks_recommended=json.dumps(stocks, indent=4, cls=encoder.JSONEncoder,
+                                                             ensure_ascii=False))
+
+    @app.route('/stock/analyze/risk')
+    def analyze_risk_all(db: SQLAlchemy):
+
+        result = common.stock_codes(db)
+        for item in result:
+            if item.corp_cls == 'N':
+                continue
+            code = item.stock_code
+            inspection = inspector.analyze_risk(db, code)
+            msg = []
+            for risk_result in inspection.risk_results:
+                msg.append(
+                    str(risk_result.risk_type.value) + " " + str(risk_result.year) + " " + str(risk_result.is_normal))
+            print(inspection.company.stock_name, inspection.company.stock_code, inspection.company.corp_cls, msg)
+
+        response = jsonify(status='OK')
+        response.status = '201 CREATED'
         return response
 
     @app.route('/stock/analyze/risk/<code>')
@@ -41,32 +82,6 @@ def configure(app):
         response = make_response(json.dumps(inspection, indent=4, cls=encoder.JSONEncoder, ensure_ascii=False))
         response.status = '200'
         return response
-
-        # result = common.stock_codes(db)
-        # for item in result:
-        #     if item.corp_cls == 'N':
-        #         continue
-        #     code = item.stock_code
-        #
-        #     # risk_results = filter.analyze_revenue_risk(db, code)
-        #     # risk_results = filter.analyze_business_loss_risk(db, code)
-        #     # risk_results = filter.analyze_operating_loss_risk(db, code)
-        #     risk_results = filter.analyze_capital_impairment_risk(db, code)
-        #
-        #     for result in risk_results:
-        #         if result.is_normal is not None and not result.is_normal:
-        #             print(result.company.stock_code, result.company.stock_name, result.risk_type, result.year,
-        #                   result.is_normal, result.evidence)
-        #
-        #         # if result.is_normal is None:
-        #         #     if db.session.query(exists().where(model.FinancialData.corp_code == item.corp_code).where(
-        #         #             model.FinancialData.reprt_code == '11011')).scalar():
-        #         #         print(result.company.stock_code, result.company.stock_name, result.risk_type, result.year,
-        #         #               result.is_normal, result.evidence)
-
-        # response = jsonify(status='OK')
-        # response.status = '201 CREATED'
-        # return response
 
     @app.route('/index')
     def index():

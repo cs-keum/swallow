@@ -13,7 +13,6 @@ from flask_sqlalchemy import SQLAlchemy
 
 from hts import kiwoom
 
-
 from service import stock
 from service import crawler
 
@@ -54,7 +53,10 @@ class AppModule(Module):
 
 
 def main():
-    app = Flask(__name__)
+    app = Flask(__name__,
+                static_url_path='',
+                static_folder='static',
+                template_folder='templates')
 
     config_path = os.path.join(definitions.ROOT_DIR, 'config/config.ini')
 
@@ -68,7 +70,8 @@ def main():
     host = config['DB']['HOST']
     dbname = config['DB']['DBNAME']
 
-    app.config.update(SQLALCHEMY_DATABASE_URI=dialect + "+" + driver + "://" + user + ":" + password + "@" + host + "/" + dbname)
+    app.config.update(
+        SQLALCHEMY_DATABASE_URI=dialect + "+" + driver + "://" + user + ":" + password + "@" + host + "/" + dbname)
     app.debug = False
 
     injector = Injector([AppModule(app)])
@@ -77,16 +80,19 @@ def main():
 
     FlaskInjector(app=app, injector=injector)
 
-    # app.run(port=9090, debug=True)
-    client = app.test_client()
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.run(port=9090, debug=True)
+    # client = app.test_client()
 
     # response = client.get('/crawling/nfinance/companyperformance')
     # response = client.get('/crawling/dart/financialdata')
     # response = client.get('/crawling/krx/investratio')
 
-    response = client.get('/stock/recommend')
+    # response = client.get('/stock/recommend')
+    # response = client.get('/stock/analyze/risk')
     # response = client.get('/stock/analyze/value/029460')
     # response = client.get('/stock/analyze/risk/950130')
+
 
 # response = client.get('/company/updatesector')
 

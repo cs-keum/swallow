@@ -1,0 +1,48 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+    <title>Swallow app</title>
+
+
+    <link href="https://unpkg.com/tabulator-tables@4.5.3/dist/css/tabulator.min.css" rel="stylesheet">
+    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.5.3/dist/js/tabulator.min.js"></script>
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+
+    <script>
+      $(document).ready(function() {
+        var table = new Tabulator(document.getElementById('example-table'), {
+            height:"100%", // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
+            layout:"fitColumns", //fit columns to width of table (optional)
+            columns:[ //Define Table Columns
+                {title:"stock_code", field:"stock_code", width:100},
+                {title:"stock_name", field:"stock_name", width:200, align:"left"},
+                {title:"stock_sector", field:"stock_sector"},
+                {title:"capital_value", field:"capital_value", width:150, formatter:"money", formatterParams:{precision:false}},
+<!--                {title:"listed_stocks", field:"listed_stocks", width:150, formatter:"money", formatterParams:{precision:false}},-->
+                {title:"excess_profit", field:"excess_profit", width:150, formatter:"money", formatterParams:{precision:0}},
+                {title:"price", field:"price", width:100, formatter:"money", formatterParams:{precision:false}},
+                {title:"buy_price", field:"buy_price", width:100, formatter:"money", formatterParams:{precision:false}},
+                {title:"adequate_price", field:"adequate_price", width:100, formatter:"money", formatterParams:{precision:false}},
+                {title:"excess_price", field:"excess_price", width:100, formatter:"money", formatterParams:{precision:false}},
+                {title:"roe", field:"roe", width:100},
+                {title:"roes", field:"roes",formatter:function(cell, formatterParams, onRendered){
+                        return JSON.stringify(cell.getValue())
+                    }
+                },
+            ],
+            rowClick:function(e, row){ //trigger an alert message when the row is clicked
+                alert("Row " + row.getData().id + " Clicked!!!!");
+            },
+        });
+
+        var tabledata = {{stocks_recommended|tojson}} ;
+        table.setData(tabledata);
+      });
+    </script>
+
+</head>
+<body>
+<!--    <h1>Hello Flask!</h1>-->
+<div id="example-table"></div>
+</body>
+</html>
