@@ -17,9 +17,9 @@ conn = create_engine("mysql+pymysql://root:" + "root" + "@127.0.0.1:3306/marketd
 
 
 def current_stock(db, code):
-    item = db.session.query(model.InvestRatio).filter(
-        model.InvestRatio.stock_code == code).order_by(
-        model.InvestRatio.id.desc()).first()
+    item = db.session.query(model.MarketCondition).filter(
+        model.MarketCondition.stock_code == code).order_by(
+        model.MarketCondition.id.desc()).first()
     return item
 
 
@@ -156,44 +156,56 @@ def define_roe(trend, roe_dic, follow_trend):
     return round(roe_sum / divide_var, 3)
 
 
-def xbrl_capital_value(code):
-    sql = "SELECT equityattributabletoownersofparent FROM xbrl WHERE xbrl.stock_code='" + code + "' AND xbrl.equityattributabletoownersofparent IS NOT NULL ORDER BY xbrl.rcept_dt DESC LIMIT 1;"
-    df = pd.read_sql_query(sql, conn)
+# def xbrl_capital_value(code):
+#     sql = "SELECT equityattributabletoownersofparent FROM xbrl WHERE xbrl.stock_code='" + code + "' AND xbrl.equityattributabletoownersofparent IS NOT NULL ORDER BY xbrl.rcept_dt DESC LIMIT 1;"
+#     df = pd.read_sql_query(sql, conn)
+#
+#     if df.size == 0:
+#         return -1
+#
+#     value = int(df.iloc[0][0].replace(',', ''))
+#
+#     return value
 
-    if df.size == 0:
-        return -1
 
-    value = int(df.iloc[0][0].replace(',', ''))
-
-    return value
-
-
-def listed_stocks(code):
-    sql = "SELECT listed_stocks FROM stock_info WHERE stock_info.code = '" + code + "' ORDER BY id DESC LIMIT 1;"
-    df = pd.read_sql_query(sql, conn)
-    value = int(df.iloc[0][0])
-
-    return value
+# def listed_stocks(code):
+#     sql = "SELECT listed_stocks FROM stock_info WHERE stock_info.code = '" + code + "' ORDER BY id DESC LIMIT 1;"
+#     df = pd.read_sql_query(sql, conn)
+#     value = int(df.iloc[0][0])
+#
+#     return value
 
 
 def define_value(db, code, stock_company, _roe, roe_dic, yield_rate):
     item = current_stock(db, code)
-    # price = 0
-    # name = ''
     try:
-        price = item.price
+        price = item.current_price
         name = item.stock_name
+        listedStocks = item.listed_stocks
     except:
         return None
 
     # capitalValue = xbrl_capital_value(code)
+
+    bsns_year = datetime.today().year
     company_item = common.company(db, code)
-    capitalValue = common.equity_owners_value(db, company_item, '2019', '11014')
+    reprt_codes = ['11011', '11014', '11012', '11013']
+
+    capitalValue = None
+    while bsns_year >= datetime.today().year - 1:
+
+        for reprt_code in reprt_codes:
+            capitalValue = common.equity_owners_value(db, company_item, bsns_year, reprt_code)
+            if capitalValue is not None:
+                break
+
+        if capitalValue is not None:
+            break
+
+        bsns_year -= 1
 
     if capitalValue is None:
         return None
-
-    listedStocks = listed_stocks(code)
 
     gap_roe = _roe - yield_rate
     excessProfit = (capitalValue * gap_roe / 100)
@@ -231,7 +243,7 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate):
     #     pass
 
     stock_definition = model.StockDefinition(datetime.today().strftime('%Y-%m-%d'), code, name, stock_company.sector,
-                                             capitalValue, listedStocks, excessProfit, price, buyingStockValue,
+                                             stock_company.induty_code, capitalValue, listedStocks, excessProfit, price, buyingStockValue,
                                              adequateStockValue, excessStockValue, _roe, roe_dic)
     return stock_definition
 
@@ -251,7 +263,7 @@ def recommend_stocks(db: SQLAlchemy, steady_roe, volatility, yield_rate):
     result = common.stock_codes(db)
 
     for item in result:
-        stock_definition = recommend_stock(db, item.stock_code, steady_roe, volatility)
+        stock_definition = recommend_stock(db, item.stock_code, steady_roe, volatility, yield_rate)
         if stock_definition is None:
             continue
 
@@ -288,8 +300,8 @@ def __stock(db: SQLAlchemy, stock_code, filter_recommend, steady_roe, volatility
                                                 filter_recommend, steady_roe, volatility, yield_rate)
             if is_valid and assumed_roe != 0:
                 roe_dic[key] = assumed_roe
-            else:
-                return None
+            # else:
+            #     return None
 
     _aligned_roe_dic = aligned_roe_dic(roe_dic)
     if steady_roe and len(_aligned_roe_dic) < 3:

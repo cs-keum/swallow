@@ -17,14 +17,15 @@
                 {title:"stock_code", field:"stock_code", width:100},
                 {title:"stock_name", field:"stock_name", width:150, align:"left"},
                 {title:"stock_sector", field:"stock_sector"},
-                {title:"capital_value", field:"capital_value", width:150, formatter:"money", formatterParams:{precision:false}},
-                {title:"listed_stocks", field:"listed_stocks", width:150, formatter:"money", formatterParams:{precision:false}},
-                {title:"excess_profit", field:"excess_profit", width:150, formatter:"money", formatterParams:{precision:0}},
-                {title:"price", field:"price", width:100, formatter:"money", formatterParams:{precision:false}},
-                {title:"buy_price", field:"buy_price", width:100, formatter:"money", formatterParams:{precision:false}},
-                {title:"adequate_price", field:"adequate_price", width:100, formatter:"money", formatterParams:{precision:false}},
-                {title:"excess_price", field:"excess_price", width:100, formatter:"money", formatterParams:{precision:false}},
-                {title:"roe", field:"roe", width:100},
+                {title:"industry_code", field:"industry_code", width:50},
+                {title:"capital_value", field:"capital_value", width:100, formatter:"money", formatterParams:{precision:false}},
+                {title:"listed_stocks", field:"listed_stocks", width:100, formatter:"money", formatterParams:{precision:false}},
+                {title:"excess_profit", field:"excess_profit", width:100, formatter:"money", formatterParams:{precision:0}},
+                {title:"price", field:"price", width:80, formatter:"money", formatterParams:{precision:false}},
+                {title:"buy_price", field:"buy_price", width:80, formatter:"money", formatterParams:{precision:false}},
+                {title:"adequate_price", field:"adequate_price", width:80, formatter:"money", formatterParams:{precision:false}},
+                {title:"excess_price", field:"excess_price", width:80, formatter:"money", formatterParams:{precision:false}},
+                {title:"roe", field:"roe", width:80},
                 {title:"roes", field:"roes",formatter:function(cell, formatterParams, onRendered){
                         return JSON.stringify(cell.getValue())
                     }

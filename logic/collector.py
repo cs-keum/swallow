@@ -39,24 +39,37 @@ def nfinance_company_performance(db: SQLAlchemy):
     return
 
 
-def krx_invest_ratio(db: SQLAlchemy):
-    latest_trade_date = db.session.query(model.InvestRatio).order_by(model.InvestRatio.id.desc()).first().tdate
+def krx_market_condition(db: SQLAlchemy):
 
-    from_datetime = datetime(2015, 1, 1)
-    if latest_trade_date is not None:
-        from_datetime = latest_trade_date + timedelta(days=1)
-    to_datetime = datetime.today() + timedelta(days=-1)
+    trade_date = datetime.today().strftime("%Y%m%d")
 
-    date_range = pd.date_range(from_datetime, to_datetime)
-    for single_date in date_range:
-        trade_date = single_date.strftime("%Y%m%d")
+    df = krx.stock_market_condition(trade_date)
 
-        df = krx.invest_ratio(trade_date)
-
-        db.session.bulk_insert_mappings(model.InvestRatio, df.to_dict(orient="records"))
-        db.session.commit()
+    db.session.query(model.MarketCondition).delete()
+    db.session.bulk_insert_mappings(model.MarketCondition, df.to_dict(orient="records"))
+    db.session.commit()
 
     return
+
+
+# def krx_invest_ratio(db: SQLAlchemy):
+#     latest_trade_date = db.session.query(model.InvestRatio).order_by(model.InvestRatio.id.desc()).first().tdate
+#
+#     from_datetime = datetime(2015, 1, 1)
+#     if latest_trade_date is not None:
+#         from_datetime = latest_trade_date + timedelta(days=1)
+#     to_datetime = datetime.today() + timedelta(days=-1)
+#
+#     date_range = pd.date_range(from_datetime, to_datetime)
+#     for single_date in date_range:
+#         trade_date = single_date.strftime("%Y%m%d")
+#
+#         df = krx.invest_ratio(trade_date)
+#
+#         db.session.bulk_insert_mappings(model.InvestRatio, df.to_dict(orient="records"))
+#         db.session.commit()
+#
+#     return
 
 
 def krx_industry_type(db: SQLAlchemy):
@@ -96,7 +109,7 @@ def request_dart_annual_financial_data(db: SQLAlchemy, item: model.Company):
     years_period = 0
 
     exists_annual_data = False
-    while years_period <= 5:
+    while years_period <= 2:
         year = bsns_year - years_period
 
         reprt_code = '11011'

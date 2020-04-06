@@ -12,3 +12,4 @@ flask_sqlalchemy
 fastavro
 elasticsearch
 boto
+apscheduler

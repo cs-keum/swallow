@@ -168,41 +168,81 @@ class FinancialData(Base):
         self.bfefrmtrm_amount = bfefrmtrm_amount
 
 
-class InvestRatio(Base):
-    __tablename__ = 'invest_ratio'
+class MarketCondition(Base):
+    __tablename__ = 'market_condition'
     __table_args__ = {'mysql_collate': 'utf8_general_ci'}
 
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
-    tdate = Column(Date)
     stock_code = Column(String(50))
     stock_name = Column(String(50))
-    managed = Column(String(10))
-    price = Column(Integer)
-    eps = Column(Float)
-    per = Column(Float)
-    bps = Column(Float)
-    pbr = Column(Float)
-    roe = Column(Float)
-    dividend = Column(Integer)
-    dividend_yield = Column(Integer)
+    current_price = Column(Integer)
+    compare = Column(Integer)
+    fluctuation_rate = Column(Float)
+    market_price = Column(Integer)
+    high_price = Column(Integer)
+    low_price = Column(Integer)
+    trading_volume = Column(Float)
+    transaction_amount = Column(Float)
+    total_market_price = Column(Float)
+    total_market_price_ratio = Column(Float)
+    listed_stocks = Column(Float)
 
-    def __init__(self, tdate, stock_code, stock_name, managed, price, eps, per, bps, pbr, roe, dividend,
-                 dividend_yield):
-        self.tdate = tdate
+    def __init__(self, stock_code, stock_name, current_price, compare, fluctuation_rate, market_price, high_price,
+                 low_price, trading_volume, transaction_amount, total_market_price, total_market_price_ratio,
+                 listed_stocks):
         self.stock_code = stock_code
         self.stock_name = stock_name
-        self.managed = managed
-        self.price = price
-        self.eps = eps
-        self.per = per
-        self.bps = bps
-        self.pbr = pbr
-        self.roe = roe
-        self.dividend = dividend
-        self.dividend_yield = dividend_yield
+        self.current_price = current_price
+        self.compare = compare
+        self.fluctuation_rate = fluctuation_rate
+        self.market_price = market_price
+        self.high_price = high_price
+        self.low_price = low_price
+        self.trading_volume = trading_volume
+        self.transaction_amount = transaction_amount
+        self.total_market_price = total_market_price
+        self.total_market_price_ratio = total_market_price_ratio
+        self.listed_stocks = listed_stocks
 
     def as_dict(self):
         return {x.name: getattr(self, x.name) for x in self.__table__.columns}
+
+
+# class InvestRatio(Base):
+#     __tablename__ = 'invest_ratio'
+#     __table_args__ = {'mysql_collate': 'utf8_general_ci'}
+#
+#     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
+#     tdate = Column(Date)
+#     stock_code = Column(String(50))
+#     stock_name = Column(String(50))
+#     managed = Column(String(10))
+#     price = Column(Integer)
+#     eps = Column(Float)
+#     per = Column(Float)
+#     bps = Column(Float)
+#     pbr = Column(Float)
+#     roe = Column(Float)
+#     dividend = Column(Integer)
+#     dividend_yield = Column(Integer)
+#
+#     def __init__(self, tdate, stock_code, stock_name, managed, price, eps, per, bps, pbr, roe, dividend,
+#                  dividend_yield):
+#         self.tdate = tdate
+#         self.stock_code = stock_code
+#         self.stock_name = stock_name
+#         self.managed = managed
+#         self.price = price
+#         self.eps = eps
+#         self.per = per
+#         self.bps = bps
+#         self.pbr = pbr
+#         self.roe = roe
+#         self.dividend = dividend
+#         self.dividend_yield = dividend_yield
+#
+#     def as_dict(self):
+#         return {x.name: getattr(self, x.name) for x in self.__table__.columns}
 
 
 class StockDefinition(Base):
@@ -214,6 +254,7 @@ class StockDefinition(Base):
     stock_code = Column(String(50))
     stock_name = Column(String(50))
     stock_sector = Column(String(50))
+    industry_code = Column(String(10))
     capital_value = Column(Integer)
     listed_stocks = Column(Integer)
     excess_profit = Column(Integer)
@@ -224,13 +265,14 @@ class StockDefinition(Base):
     roe = Column(Float)
     roes = Column(String(150))
 
-    def __init__(self, creation_datetime=None, stock_code=None, stock_name=None, stock_sector=None, capital_value=0,
-                 listed_stocks=0, excess_profit=0, price=0, buy_price=0, adequate_price=0, excess_price=0, roe=0,
-                 roes={}):
+    def __init__(self, creation_datetime=None, stock_code=None, stock_name=None, stock_sector=None,
+                 industry_code=None, capital_value=0, listed_stocks=0, excess_profit=0, price=0, buy_price=0,
+                 adequate_price=0, excess_price=0, roe=0, roes={}):
         self.creation_datetime = creation_datetime
         self.stock_code = stock_code
         self.stock_name = stock_name
         self.stock_sector = stock_sector
+        self.industry_code = industry_code
         self.capital_value = capital_value
         self.listed_stocks = listed_stocks
         self.excess_profit = excess_profit

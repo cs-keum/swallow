@@ -11,7 +11,11 @@ from flask import Flask, Request, jsonify, render_template
 from flask_injector import FlaskInjector
 from flask_sqlalchemy import SQLAlchemy
 
+from apscheduler.schedulers.background import BackgroundScheduler
+
 from hts import kiwoom
+
+from logic import collector
 
 from service import stock
 from service import crawler
@@ -80,13 +84,23 @@ def main():
 
     FlaskInjector(app=app, injector=injector)
 
+    bind_db = injector.binder.get_binding(SQLAlchemy)
+    args_list = [bind_db[0].provider.get(injector)]
+
+    collector.krx_market_condition(args_list[0])
+
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(func=collector.krx_market_condition, trigger='interval', args=args_list, seconds=20*60)
+    scheduler.start()
+
     app.config['TEMPLATES_AUTO_RELOAD'] = True
-    app.run(port=9090, debug=True)
+    app.run(port=9090)
     # client = app.test_client()
 
-    # response = client.get('/crawling/nfinance/companyperformance')
+        # response = client.get('/crawling/nfinance/companyperformance')
     # response = client.get('/crawling/dart/financialdata')
     # response = client.get('/crawling/krx/investratio')
+    # response = client.get('/crawling/krx/marketcondition')
 
     # response = client.get('/stock/recommend')
     # response = client.get('/stock/analyze/risk')

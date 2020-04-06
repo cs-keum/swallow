@@ -14,8 +14,6 @@ from logic import finder
 from logic import inspector
 from utils import encoder
 
-from logic import collector
-
 from hts import kiwoom
 
 
