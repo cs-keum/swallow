@@ -88,6 +88,7 @@ def main():
     args_list = [bind_db[0].provider.get(injector)]
 
     collector.krx_market_condition(args_list[0])
+    collector.krx_invest_reference(args_list[0])
     collector.krx_foreign_holding(args_list[0])
 
     scheduler = BackgroundScheduler()

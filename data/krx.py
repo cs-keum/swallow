@@ -50,85 +50,77 @@ def stock_market_condition(trade_date):
 
     df = pd.read_excel(BytesIO(r.content), thousands=',')
 
-    df.columns = ["stock_code", "stock_name", "current_price", "compare", "fluctuation_rate", "market_price", "high_price",
+    df.columns = ["stock_code", "stock_name", "current_price", "compare", "fluctuation_rate", "market_price",
+                  "high_price",
                   "low_price", "trading_volume", "transaction_amount", "total_market_price", "total_market_price_ratio",
                   "listed_stocks"]
-
-    print("Success to get market condition data", trade_date)
     return df
 
 
-# def invest_ratio(trade_date):
-#     time.sleep(2.0)
-#
-#     req_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
-#     params = {
-#         'name': 'fileDown',
-#         'filetype': 'xls',
-#         'url': 'MKD/13/1302/13020401/mkd13020401',
-#         'market_gubun': 'ALL',
-#         'gubun': '1',
-#         'isu_cdnm': 'A005930/삼성전자',
-#         'isu_cd': 'KR7005930003',
-#         'isu_nm': '삼성전자',
-#         'isu_srt_cd': 'A005930',
-#         'schdate': str(trade_date),
-#         'fromdate': '20200103',
-#         'todate': '20200110',
-#         'pagePath': '/contents/MKD/13/1302/13020401/MKD13020401.jsp'
-#     }
-#     r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'swallow'})
-#
-#     doTry = 0
-#     while len(r1.content) <= 0:
-#         time.sleep(2.0)
-#         r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'swallow'})
-#         doTry += 1
-#         if doTry == 10:
-#             break
-#
-#     req_url = 'http://file.krx.co.kr/download.jspx'
-#     headers = {
-#         'Referer': 'http://marketdata.krx.co.kr/mdi',
-#         'User-Agent': 'swallow'
-#     }
-#     data = {
-#         'code': r1.content
-#     }
-#
-#     r = requests.post(url=req_url, data=data, headers=headers)
-#     doTry = 0
-#     while len(r.content) <= 0:
-#         time.sleep(2.0)
-#         r = requests.post(url=req_url, data=data, headers=headers)
-#         doTry = + 1
-#         if doTry == 10:
-#             break
-#
-#     if len(r.content) <= 0:
-#         print("Fail to get invest reference data", trade_date)
-#         return
-#
-#     df = pd.read_excel(BytesIO(r.content), thousands=',')
-#
-#     df.columns = ["tdate", "stock_code", "stock_name", "managed", "price", "eps", "per", "bps", "pbr", "dividend",
-#                   "dividend_yield"]
-#
-#     df['tdate'] = df['tdate'].str.replace('/', '')
-#     df['eps'] = df['eps'].apply(lambda x: '0' if x == "-" else x)
-#     df['per'] = df['per'].apply(lambda x: '0' if x == "-" else x)
-#     df['bps'] = df['bps'].apply(lambda x: '0' if x == "-" else x)
-#     df['pbr'] = df['pbr'].apply(lambda x: '0' if x == "-" else x)
-#
-#     df['roe'] = round(pd.to_numeric(df['eps']) / pd.to_numeric(df['bps']) * 100, 3)
-#
-#     df['roe'] = df['roe'].apply(lambda x: '0' if x == np.inf or np.isnan(x) else x)
-#     df['dividend'] = df['dividend'].apply(lambda x: '0' if x == np.inf or np.isnan(x) else x)
-#     df['dividend_yield'] = df['dividend_yield'].apply(lambda x: '0' if x == np.inf or np.isnan(x) else x)
-#     df.fillna(0)
-#
-#     print("Success to get invest reference data", trade_date)
-#     return df
+def invest_reference(trade_date):
+    req_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+    params = {
+        'name': 'fileDown',
+        'filetype': 'xls',
+        'url': 'MKD/13/1302/13020401/mkd13020401',
+        'market_gubun': 'ALL',
+        'gubun': '1',
+        'isu_cdnm': 'A005930/삼성전자',
+        'isu_cd': 'KR7005930003',
+        'isu_nm': '삼성전자',
+        'isu_srt_cd': 'A005930',
+        'schdate': str(trade_date),
+        'fromdate': '20200103',
+        'todate': '20200110',
+        'pagePath': '/contents/MKD/13/1302/13020401/MKD13020401.jsp'
+    }
+    r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'swallow'})
+
+    doTry = 0
+    while len(r1.content) <= 0:
+        time.sleep(2.0)
+        r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'swallow'})
+        doTry += 1
+        if doTry == 10:
+            break
+
+    req_url = 'http://file.krx.co.kr/download.jspx'
+    headers = {
+        'Referer': 'http://marketdata.krx.co.kr/mdi',
+        'User-Agent': 'swallow'
+    }
+    data = {
+        'code': r1.content
+    }
+
+    r = requests.post(url=req_url, data=data, headers=headers)
+    doTry = 0
+    while len(r.content) <= 0:
+        time.sleep(2.0)
+        r = requests.post(url=req_url, data=data, headers=headers)
+        doTry = + 1
+        if doTry == 10:
+            break
+
+    if len(r.content) <= 0:
+        print("Fail to get invest reference data", trade_date)
+        return
+
+    df = pd.read_excel(BytesIO(r.content), thousands=',')
+
+    df.columns = ["tdate", "stock_code", "stock_name", "managed", "price", "eps", "per", "bps", "pbr", "dividend",
+                  "dividend_yield"]
+
+    df['tdate'] = df['tdate'].str.replace('/', '')
+    df['eps'] = df['eps'].apply(lambda x: '0' if x == "-" else x)
+    df['per'] = df['per'].apply(lambda x: '0' if x == "-" else x)
+    df['bps'] = df['bps'].apply(lambda x: '0' if x == "-" else x)
+    df['pbr'] = df['pbr'].apply(lambda x: '0' if x == "-" else x)
+
+    df['dividend'] = df['dividend'].apply(lambda x: '0' if x == np.inf or np.isnan(x) else x)
+    df['dividend_yield'] = df['dividend_yield'].apply(lambda x: '0' if x == np.inf or np.isnan(x) else x)
+    df.fillna(0)
+    return df
 
 
 def industry_type():
@@ -230,10 +222,9 @@ def foreign_holding(trade_date):
 
     df = pd.read_excel(BytesIO(r.content), thousands=',')
 
-    df.columns = ["stock_code", "stock_name", "listed_stocks", "foreign_holding_limit", "foreign_holding", "foreign_holding_ratio"]
-    print("Success to get foreign holding data", trade_date)
+    df.columns = ["stock_code", "stock_name", "listed_stocks", "foreign_holding_limit", "foreign_holding",
+                  "foreign_holding_ratio"]
     return df
-
 
 # def stock(date):
 #     req_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'

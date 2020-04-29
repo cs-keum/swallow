@@ -25,14 +25,14 @@ def configure(app):
         response.status = '201 CREATED'
         return response
 
-    # @app.route('/crawling/krx/investratio')
-    # def krx_invest_ratio(db: SQLAlchemy):
-    #
-    #     result = collector.krx_invest_ratio(db)
-    #
-    #     response = jsonify(status='OK')
-    #     response.status = '201 CREATED'
-    #     return response
+    @app.route('/crawling/krx/investreference')
+    def krx_invest_reference(db: SQLAlchemy):
+
+        result = collector.krx_invest_reference(db)
+
+        response = jsonify(status='OK')
+        response.status = '201 CREATED'
+        return response
 
     @app.route('/crawling/krx/indestrytype')
     def krx_industry_type(db: SQLAlchemy):

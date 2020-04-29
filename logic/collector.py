@@ -40,36 +40,33 @@ def nfinance_company_performance(db: SQLAlchemy):
 
 
 def krx_market_condition(db: SQLAlchemy):
-
-    trade_date = datetime.today().strftime("%Y%m%d")
-
-    df = krx.stock_market_condition(trade_date)
-
-    db.session.query(model.MarketCondition).delete()
-    db.session.bulk_insert_mappings(model.MarketCondition, df.to_dict(orient="records"))
-    db.session.commit()
-
+    trade_date = datetime.today()
+    while True:
+        df = krx.stock_market_condition(trade_date.strftime("%Y%m%d"))
+        if df.size != 0:
+            db.session.query(model.MarketCondition).delete()
+            db.session.bulk_insert_mappings(model.MarketCondition, df.to_dict(orient="records"))
+            db.session.commit()
+            print("Success to get market condition data", trade_date)
+            break
+        else:
+            trade_date = trade_date + timedelta(days=-1)
     return
 
 
-# def krx_invest_ratio(db: SQLAlchemy):
-#     latest_trade_date = db.session.query(model.InvestRatio).order_by(model.InvestRatio.id.desc()).first().tdate
-#
-#     from_datetime = datetime(2015, 1, 1)
-#     if latest_trade_date is not None:
-#         from_datetime = latest_trade_date + timedelta(days=1)
-#     to_datetime = datetime.today() + timedelta(days=-1)
-#
-#     date_range = pd.date_range(from_datetime, to_datetime)
-#     for single_date in date_range:
-#         trade_date = single_date.strftime("%Y%m%d")
-#
-#         df = krx.invest_ratio(trade_date)
-#
-#         db.session.bulk_insert_mappings(model.InvestRatio, df.to_dict(orient="records"))
-#         db.session.commit()
-#
-#     return
+def krx_invest_reference(db: SQLAlchemy):
+    trade_date = datetime.today()
+    while True:
+        df = krx.invest_reference(trade_date.strftime("%Y%m%d"))
+        if df.size != 0:
+            db.session.query(model.InvestReference).delete()
+            db.session.bulk_insert_mappings(model.InvestReference, df.to_dict(orient="records"))
+            db.session.commit()
+            print("Success to get invest reference data", trade_date)
+            break
+        else:
+            trade_date = trade_date + timedelta(days=-1)
+    return
 
 
 def krx_industry_type(db: SQLAlchemy):
@@ -89,14 +86,17 @@ def krx_industry_type(db: SQLAlchemy):
 
 
 def krx_foreign_holding(db: SQLAlchemy):
-    trade_date = datetime.today().strftime("%Y%m%d")
-
-    df = krx.foreign_holding(trade_date)
-
-    db.session.query(model.ForeignHolding).delete()
-    db.session.bulk_insert_mappings(model.ForeignHolding, df.to_dict(orient="records"))
-    db.session.commit()
-
+    trade_date = datetime.today()
+    while True:
+        df = krx.foreign_holding(trade_date.strftime("%Y%m%d"))
+        if df.size != 0:
+            db.session.query(model.ForeignHolding).delete()
+            db.session.bulk_insert_mappings(model.ForeignHolding, df.to_dict(orient="records"))
+            db.session.commit()
+            print("Success to get foreign holding data", trade_date)
+            break
+        else:
+            trade_date = trade_date + timedelta(days=-1)
     return
 
 

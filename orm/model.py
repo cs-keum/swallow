@@ -233,41 +233,39 @@ class ForeignHolding(Base):
         return {x.name: getattr(self, x.name) for x in self.__table__.columns}
 
 
-# class InvestRatio(Base):
-#     __tablename__ = 'invest_ratio'
-#     __table_args__ = {'mysql_collate': 'utf8_general_ci'}
-#
-#     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
-#     tdate = Column(Date)
-#     stock_code = Column(String(50))
-#     stock_name = Column(String(50))
-#     managed = Column(String(10))
-#     price = Column(Integer)
-#     eps = Column(Float)
-#     per = Column(Float)
-#     bps = Column(Float)
-#     pbr = Column(Float)
-#     roe = Column(Float)
-#     dividend = Column(Integer)
-#     dividend_yield = Column(Integer)
-#
-#     def __init__(self, tdate, stock_code, stock_name, managed, price, eps, per, bps, pbr, roe, dividend,
-#                  dividend_yield):
-#         self.tdate = tdate
-#         self.stock_code = stock_code
-#         self.stock_name = stock_name
-#         self.managed = managed
-#         self.price = price
-#         self.eps = eps
-#         self.per = per
-#         self.bps = bps
-#         self.pbr = pbr
-#         self.roe = roe
-#         self.dividend = dividend
-#         self.dividend_yield = dividend_yield
-#
-#     def as_dict(self):
-#         return {x.name: getattr(self, x.name) for x in self.__table__.columns}
+class InvestReference(Base):
+    __tablename__ = 'invest_reference'
+    __table_args__ = {'mysql_collate': 'utf8_general_ci'}
+
+    id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
+    tdate = Column(Date)
+    stock_code = Column(String(50))
+    stock_name = Column(String(50))
+    managed = Column(String(10))
+    price = Column(Integer)
+    eps = Column(Float)
+    per = Column(Float)
+    bps = Column(Float)
+    pbr = Column(Float)
+    dividend = Column(Integer)
+    dividend_yield = Column(Integer)
+
+    def __init__(self, tdate, stock_code, stock_name, managed, price, eps, per, bps, pbr, dividend,
+                 dividend_yield):
+        self.tdate = tdate
+        self.stock_code = stock_code
+        self.stock_name = stock_name
+        self.managed = managed
+        self.price = price
+        self.eps = eps
+        self.per = per
+        self.bps = bps
+        self.pbr = pbr
+        self.dividend = dividend
+        self.dividend_yield = dividend_yield
+
+    def as_dict(self):
+        return {x.name: getattr(self, x.name) for x in self.__table__.columns}
 
 
 class StockDefinition(Base):
@@ -289,12 +287,17 @@ class StockDefinition(Base):
     buy_price = Column(Integer)
     adequate_price = Column(Integer)
     excess_price = Column(Integer)
+    per = Column(Float)
+    bpr = Column(Float)
+    dividend = Column(Integer)
+    dividend_yield = Column(Float)
     roe = Column(Float)
     roes = Column(String(150))
 
     def __init__(self, creation_datetime=None, stock_code=None, stock_name=None, stock_sector=None,
                  industry_code=None, capital_value=0, listed_stocks=0, foreign_holding_ratio=0, excess_profit=0,
-                 price_gap_ratio=0, price=0, buy_price=0, adequate_price=0, excess_price=0, roe=0, roes={}):
+                 price_gap_ratio=0, price=0, buy_price=0, adequate_price=0, excess_price=0, per=0, bpr=0, dividend=0,
+                 dividend_yield=0, roe=0, roes={}):
         self.creation_datetime = creation_datetime
         self.stock_code = stock_code
         self.stock_name = stock_name
@@ -309,6 +312,10 @@ class StockDefinition(Base):
         self.buy_price = buy_price
         self.adequate_price = adequate_price
         self.excess_price = excess_price
+        self.per = per
+        self.bpr = bpr
+        self.dividend = dividend
+        self.dividend_yield = dividend_yield
         self.roe = roe
         self.roes = roes
 

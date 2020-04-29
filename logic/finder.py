@@ -28,6 +28,11 @@ def foreign_holding_item(db, code):
     return item
 
 
+def invest_reference_item(db, code):
+    item = db.session.query(model.InvestReference).filter(model.InvestReference.stock_code == code).first()
+    return item
+
+
 def find_compound_power(roe):
     a = int(roe)
     b = round((roe - a) / 100, 4)
@@ -248,10 +253,21 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate):
     #     pass
     price_gap_ratio = round(price / buyingStockValue, 2)
     foreign_holding_ratio = foreign_holding_item(db, code).foreign_holding_ratio
+    ir = invest_reference_item(db, code)
+    per = 0
+    pbr = 0
+    dividend = 0
+    dividend_yield = 0
+    if ir is not None:
+        per = ir.per
+        pbr = ir.pbr
+        dividend = ir.dividend
+        dividend_yield = ir.dividend_yield
+
     stock_definition = model.StockDefinition(datetime.today().strftime('%Y-%m-%d'), code, name, stock_company.sector,
                                              stock_company.induty_code, capitalValue, listedStocks,
                                              foreign_holding_ratio, excessProfit, price_gap_ratio, price,
-                                             buyingStockValue, adequateStockValue, excessStockValue, _roe, roe_dic)
+                                             buyingStockValue, adequateStockValue, excessStockValue, per, pbr, dividend, dividend_yield, _roe, roe_dic)
     return stock_definition
 
 

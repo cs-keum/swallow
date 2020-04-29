@@ -16,17 +16,21 @@
             columns:[ //Define Table Columns
                 {title:"stock_code", field:"stock_code", width:100},
                 {title:"stock_name", field:"stock_name", width:150, align:"left"},
-                {title:"stock_sector", field:"stock_sector"},
+                {title:"stock_sector", field:"stock_sector", width:350},
                 {title:"industry_code", field:"industry_code", width:50},
-                {title:"capital_value", field:"capital_value", width:100, formatter:"money", formatterParams:{precision:false}},
-                {title:"listed_stocks", field:"listed_stocks", width:100, formatter:"money", formatterParams:{precision:false}},
-                {title:"foreign_holding_ratio", field:"foreign_holding_ratio", width:50, formatterParams:{precision:false}},
+<!--                {title:"capital_value", field:"capital_value", width:100, formatter:"money", formatterParams:{precision:false}},-->
+<!--                {title:"listed_stocks", field:"listed_stocks", width:100, formatter:"money", formatterParams:{precision:false}},-->
+                {title:"foreign_holding_ratio", field:"foreign_holding_ratio", width:70, formatterParams:{precision:false}},
                 {title:"excess_profit", field:"excess_profit", width:100, formatter:"money", formatterParams:{precision:0}},
                 {title:"price_buy_ratio", field:"price_gap_ratio", width:40, formatterParams:{precision:false}},
                 {title:"price", field:"price", width:80, formatter:"money", formatterParams:{precision:false}},
                 {title:"buy_price", field:"buy_price", width:80, formatter:"money", formatterParams:{precision:false}},
                 {title:"adequate_price", field:"adequate_price", width:80, formatter:"money", formatterParams:{precision:false}},
                 {title:"excess_price", field:"excess_price", width:80, formatter:"money", formatterParams:{precision:false}},
+                {title:"per", field:"per", width:60},
+                {title:"bpr", field:"bpr", width:60},
+                {title:"dividend", field:"dividend", width:50},
+                {title:"dividend_yield", field:"dividend_yield", width:50},
                 {title:"roe", field:"roe", width:80},
                 {title:"roes", field:"roes",formatter:function(cell, formatterParams, onRendered){
                         return JSON.stringify(cell.getValue())
