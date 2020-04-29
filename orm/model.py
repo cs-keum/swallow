@@ -208,6 +208,31 @@ class MarketCondition(Base):
         return {x.name: getattr(self, x.name) for x in self.__table__.columns}
 
 
+class ForeignHolding(Base):
+    __tablename__ = 'foreign_holding'
+    __table_args__ = {'mysql_collate': 'utf8_general_ci'}
+
+    id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
+    stock_code = Column(String(50))
+    stock_name = Column(String(50))
+    listed_stocks = Column(Float)
+    foreign_holding_limit = Column(Float)
+    foreign_holding = Column(Float)
+    foreign_holding_ratio = Column(Float)
+
+    def __init__(self, stock_code, stock_name, listed_stocks, foreign_holding_limit, foreign_holding,
+                 foreign_holding_ratio):
+        self.stock_code = stock_code
+        self.stock_name = stock_name
+        self.listed_stocks = listed_stocks
+        self.foreign_holding_limit = foreign_holding_limit
+        self.foreign_holding = foreign_holding
+        self.foreign_holding_ratio = foreign_holding_ratio
+
+    def as_dict(self):
+        return {x.name: getattr(self, x.name) for x in self.__table__.columns}
+
+
 # class InvestRatio(Base):
 #     __tablename__ = 'invest_ratio'
 #     __table_args__ = {'mysql_collate': 'utf8_general_ci'}
@@ -257,7 +282,9 @@ class StockDefinition(Base):
     industry_code = Column(String(10))
     capital_value = Column(Integer)
     listed_stocks = Column(Integer)
+    foreign_holding_ratio = Column(Float)
     excess_profit = Column(Integer)
+    price_gap_ratio = Column(Float)
     price = Column(Integer)
     buy_price = Column(Integer)
     adequate_price = Column(Integer)
@@ -266,8 +293,8 @@ class StockDefinition(Base):
     roes = Column(String(150))
 
     def __init__(self, creation_datetime=None, stock_code=None, stock_name=None, stock_sector=None,
-                 industry_code=None, capital_value=0, listed_stocks=0, excess_profit=0, price=0, buy_price=0,
-                 adequate_price=0, excess_price=0, roe=0, roes={}):
+                 industry_code=None, capital_value=0, listed_stocks=0, foreign_holding_ratio=0, excess_profit=0,
+                 price_gap_ratio=0, price=0, buy_price=0, adequate_price=0, excess_price=0, roe=0, roes={}):
         self.creation_datetime = creation_datetime
         self.stock_code = stock_code
         self.stock_name = stock_name
@@ -275,7 +302,9 @@ class StockDefinition(Base):
         self.industry_code = industry_code
         self.capital_value = capital_value
         self.listed_stocks = listed_stocks
+        self.foreign_holding_ratio = foreign_holding_ratio
         self.excess_profit = excess_profit
+        self.price_gap_ratio = price_gap_ratio
         self.price = price
         self.buy_price = buy_price
         self.adequate_price = adequate_price

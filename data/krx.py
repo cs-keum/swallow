@@ -182,6 +182,59 @@ def industry_type():
     return df
 
 
+def foreign_holding(trade_date):
+    req_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+    params = {
+        'name': 'fileDown',
+        'filetype': 'xls',
+        'url': 'MKD/13/1302/13020402/mkd13020402',
+        'market_gubun': 'ALL',
+        'lmt_tp': 1,
+        'sect_tp_cd': 'ALL',
+        'schdate': str(trade_date),
+        'pagePath': '/contents/MKD/13/1302/13020402/MKD13020402.jsp'
+    }
+    r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'test'})
+
+    # print("기본 데이터 가져오기 중 ...")
+
+    doTry = 0
+    while len(r1.content) <= 0:
+        time.sleep(2.0)
+        r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'test'})
+        doTry += 1
+        # print("기본 데이터 가져오기 중 ...", doTry)
+        if doTry == 10:
+            break
+
+    req_url = 'http://file.krx.co.kr/download.jspx'
+    headers = {
+        'Referer': 'http://marketdata.krx.co.kr/mdi',
+        'User-Agent': 'test'
+    }
+    data = {
+        'code': r1.content
+    }
+
+    r = requests.post(url=req_url, data=data, headers=headers)
+    doTry = 0
+    while len(r.content) <= 0:
+        time.sleep(2.0)
+        r = requests.post(url=req_url, data=data, headers=headers)
+        doTry = + 1
+        if doTry == 10:
+            break
+
+    if len(r.content) <= 0:
+        return
+
+    df = pd.read_excel(BytesIO(r.content), thousands=',')
+
+    df.columns = ["stock_code", "stock_name", "listed_stocks", "foreign_holding_limit", "foreign_holding", "foreign_holding_ratio"]
+    print("Success to get foreign holding data", trade_date)
+    return df
+
+
 # def stock(date):
 #     req_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
 #     params = {

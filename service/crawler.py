@@ -43,6 +43,15 @@ def configure(app):
         response.status = '201 CREATED'
         return response
 
+    @app.route('/crawling/krx/foreignholding')
+    def krx_foreign_holding(db: SQLAlchemy):
+
+        result = collector.krx_foreign_holding(db)
+
+        response = jsonify(status='OK')
+        response.status = '201 CREATED'
+        return response
+
     @app.route('/crawling/dart/financialdata')
     def dart_financial_data(db: SQLAlchemy):
 
@@ -52,7 +61,12 @@ def configure(app):
         else:
             initial = True
 
-        result = collector.dart_financial_data(db, initial)
+        decided_year = request.args.get('decided_year')
+        decided_reprt_code = request.args.get('decided_reprt_code')
+        if decided_year is not None and decided_reprt_code is not None:
+            result = collector.dart_decided_period_financial_data(db, initial, decided_year, decided_reprt_code)
+        else:
+            result = collector.dart_financial_data(db, initial)
 
         response = jsonify(status='OK')
         response.status = '201 CREATED'

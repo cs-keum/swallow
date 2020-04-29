@@ -88,6 +88,18 @@ def krx_industry_type(db: SQLAlchemy):
     return
 
 
+def krx_foreign_holding(db: SQLAlchemy):
+    trade_date = datetime.today().strftime("%Y%m%d")
+
+    df = krx.foreign_holding(trade_date)
+
+    db.session.query(model.ForeignHolding).delete()
+    db.session.bulk_insert_mappings(model.ForeignHolding, df.to_dict(orient="records"))
+    db.session.commit()
+
+    return
+
+
 def dart_financial_data(db: SQLAlchemy, initial):
     result = common.stock_codes(db)
 
@@ -98,6 +110,20 @@ def dart_financial_data(db: SQLAlchemy, initial):
             continue
 
         request_dart_annual_financial_data(db, item)
+
+    return
+
+
+def dart_decided_period_financial_data(db: SQLAlchemy, initial, decided_year, decided_reprt_code):
+    result = common.stock_codes(db)
+
+    for item in result:
+
+        if not initial and not db.session.query(
+                exists().where(model.FinancialData.corp_code == item.corp_code)).scalar():
+            continue
+
+        request_dart_quarter_financial_data(db, item, decided_year=decided_year, decided_reprt_code=decided_reprt_code)
 
     return
 
@@ -135,7 +161,7 @@ def request_dart_annual_financial_data(db: SQLAlchemy, item: model.Company):
     return exists_annual_data
 
 
-def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company):
+def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company, decided_year, decided_reprt_code):
     bsns_year = datetime.today().year
 
     # 최근 분기보고서
@@ -146,10 +172,19 @@ def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company):
 
     data_exists = False
     while years_period <= 5:
+
         year = bsns_year - years_period
+
+        if decided_year and decided_year != str(year):
+            years_period += 1
+            continue
 
         reprt_code_list = ['11014', '11012', '11013']
         for reprt_code in reprt_code_list:
+
+            if decided_reprt_code and decided_reprt_code != reprt_code:
+                continue
+
             exist_data = db.session.query(exists().where(model.FinancialData.corp_code == item.corp_code).where(
                 model.FinancialData.bsns_year == year).where(model.FinancialData.reprt_code == reprt_code)).scalar()
 
