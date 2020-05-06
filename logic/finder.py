@@ -192,6 +192,8 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate):
         price = item.current_price
         name = item.stock_name
         listedStocks = item.listed_stocks
+        trading_volume = item.trading_volume
+        total_market_price = item.total_market_price
     except:
         return None
 
@@ -265,9 +267,10 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate):
         dividend_yield = ir.dividend_yield
 
     stock_definition = model.StockDefinition(datetime.today().strftime('%Y-%m-%d'), code, name, stock_company.sector,
-                                             stock_company.induty_code, capitalValue, listedStocks,
-                                             foreign_holding_ratio, excessProfit, price_gap_ratio, price,
-                                             buyingStockValue, adequateStockValue, excessStockValue, per, pbr, dividend, dividend_yield, _roe, roe_dic)
+                                             stock_company.induty_code, capitalValue, listedStocks, trading_volume,
+                                             total_market_price, foreign_holding_ratio, excessProfit, price_gap_ratio,
+                                             price, buyingStockValue, adequateStockValue, excessStockValue, per, pbr,
+                                             dividend, dividend_yield, _roe, roe_dic)
     return stock_definition
 
 

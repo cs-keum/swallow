@@ -280,6 +280,8 @@ class StockDefinition(Base):
     industry_code = Column(String(10))
     capital_value = Column(Integer)
     listed_stocks = Column(Integer)
+    trading_volume = Column(Integer)
+    total_market_price = Column(Integer)
     foreign_holding_ratio = Column(Float)
     excess_profit = Column(Integer)
     price_gap_ratio = Column(Float)
@@ -295,9 +297,9 @@ class StockDefinition(Base):
     roes = Column(String(150))
 
     def __init__(self, creation_datetime=None, stock_code=None, stock_name=None, stock_sector=None,
-                 industry_code=None, capital_value=0, listed_stocks=0, foreign_holding_ratio=0, excess_profit=0,
-                 price_gap_ratio=0, price=0, buy_price=0, adequate_price=0, excess_price=0, per=0, bpr=0, dividend=0,
-                 dividend_yield=0, roe=0, roes={}):
+                 industry_code=None, capital_value=0, listed_stocks=0, trading_volume=0, total_market_price=0,
+                 foreign_holding_ratio=0, excess_profit=0, price_gap_ratio=0, price=0, buy_price=0, adequate_price=0,
+                 excess_price=0, per=0, bpr=0, dividend=0, dividend_yield=0, roe=0, roes={}):
         self.creation_datetime = creation_datetime
         self.stock_code = stock_code
         self.stock_name = stock_name
@@ -305,6 +307,8 @@ class StockDefinition(Base):
         self.industry_code = industry_code
         self.capital_value = capital_value
         self.listed_stocks = listed_stocks
+        self.trading_volume = trading_volume
+        self.total_market_price = total_market_price
         self.foreign_holding_ratio = foreign_holding_ratio
         self.excess_profit = excess_profit
         self.price_gap_ratio = price_gap_ratio
