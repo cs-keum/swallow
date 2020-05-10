@@ -197,6 +197,11 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate):
     except:
         return None
 
+    cash_flows = common.cash_flows(db, stock_company, '11011')
+    total_market_price_cash_flows_ratio = None
+    if cash_flows is not None:
+        total_market_price_cash_flows_ratio = round(total_market_price / cash_flows, 2)
+
     # capitalValue = xbrl_capital_value(code)
 
     bsns_year = datetime.today().year
@@ -268,8 +273,9 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate):
 
     stock_definition = model.StockDefinition(datetime.today().strftime('%Y-%m-%d'), code, name, stock_company.sector,
                                              stock_company.induty_code, capitalValue, listedStocks, trading_volume,
-                                             total_market_price, foreign_holding_ratio, excessProfit, price_gap_ratio,
-                                             price, buyingStockValue, adequateStockValue, excessStockValue, per, pbr,
+                                             total_market_price, cash_flows, total_market_price_cash_flows_ratio,
+                                             foreign_holding_ratio, excessProfit, price_gap_ratio, price,
+                                             buyingStockValue, adequateStockValue, excessStockValue, per, pbr,
                                              dividend, dividend_yield, _roe, roe_dic)
     return stock_definition
 

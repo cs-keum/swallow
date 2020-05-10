@@ -42,6 +42,34 @@ def revenue(db: SQLAlchemy, company_item, reprt_code):
     return result
 
 
+def cash_flows(db: SQLAlchemy, company_item, reprt_code):
+    result = db.session.query(model.FinancialData).filter(
+        model.FinancialData.corp_code == company_item.corp_code).filter(
+        model.FinancialData.reprt_code == reprt_code).filter(
+        or_(model.FinancialData.account_id == 'ifrs_CashFlowsFromUsedInOperatingActivities',
+            model.FinancialData.account_id == 'ifrs-full_CashFlowsFromUsedInOperatingActivities')).order_by(
+        model.FinancialData.bsns_year.desc())
+
+    result_count = result.count()
+
+    if result_count == 0 and db.session.query(
+            exists().where(model.FinancialData.corp_code == company_item.corp_code).where(
+                model.FinancialData.reprt_code == reprt_code)).scalar():
+        result = db.session.query(model.FinancialData).filter(
+            model.FinancialData.corp_code == company_item.corp_code).filter(
+            model.FinancialData.reprt_code == reprt_code).filter(
+            or_(model.FinancialData.account_nm == '영업활동현금흐름',
+                model.FinancialData.account_nm == '영업활동으로인한현금흐름',
+                model.FinancialData.account_nm == '영업활동으로 인한 현금흐름',
+                model.FinancialData.account_nm == 'Ⅰ.영업활동으로 인한 현금흐름')).order_by(
+            model.FinancialData.bsns_year.desc())
+
+    if result.count() == 0:
+        return None
+    else:
+        return amount(result.first())
+
+
 def equity(db: SQLAlchemy, company_item, reprt_code):
     result = db.session.query(model.FinancialData).filter(
         model.FinancialData.corp_code == company_item.corp_code).filter(model.FinancialData.sj_div == 'BS').filter(
