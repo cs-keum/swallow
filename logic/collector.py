@@ -104,12 +104,12 @@ def dart_financial_data(db: SQLAlchemy, initial):
     result = common.stock_codes(db)
 
     for item in result:
-
         if not initial and not db.session.query(
                 exists().where(model.FinancialData.corp_code == item.corp_code)).scalar():
             continue
 
-        request_dart_annual_financial_data(db, item)
+        if request_dart_annual_financial_data(db, item):
+            request_dart_quarter_financial_data(db, item, None, None)
 
     return
 
@@ -143,6 +143,16 @@ def request_dart_annual_financial_data(db: SQLAlchemy, item: model.Company):
             model.FinancialData.bsns_year == year).where(model.FinancialData.reprt_code == reprt_code)).scalar()
 
         if exist_data:
+            # company_item = db.session.query(model.Company).filter(model.Company.stock_code == item.stock_code).one()
+            update_latest_report(db, item, year, reprt_code)
+            # if item.bsns_year_updated is not None and item.bsns_year_updated < year:
+            #     item.bsns_year_updated = year
+            # reprt_codes_dic = {'11011': 1, '11014': 2, '11012': 3, '11013': 4}
+            # if item.reprt_code_updated is not None and reprt_codes_dic[item.reprt_code_updated] >= reprt_codes_dic[
+            #     reprt_code]:
+            #     item.reprt_code_updated = reprt_code
+            # db.session.commit()
+
             years_period += 1
             continue
 
@@ -154,6 +164,7 @@ def request_dart_annual_financial_data(db: SQLAlchemy, item: model.Company):
             db.session.bulk_insert_mappings(model.FinancialData, df.to_dict(orient="records"))
             db.session.commit()
             print("Success to get data", item.stock_code, item.stock_name, year)
+            update_latest_report(db, item, year, reprt_code)
             exists_annual_data = True
 
         years_period += 1
@@ -189,6 +200,7 @@ def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company, dec
                 model.FinancialData.bsns_year == year).where(model.FinancialData.reprt_code == reprt_code)).scalar()
 
             if exist_data:
+                update_latest_report(db, item, year, reprt_code)
                 data_exists = True
                 break
 
@@ -200,6 +212,7 @@ def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company, dec
                 db.session.bulk_insert_mappings(model.FinancialData, df.to_dict(orient="records"))
                 db.session.commit()
                 print("Success to get data", item.stock_code, item.stock_name, year, reprt_code)
+                update_latest_report(db, item, year, reprt_code)
                 data_exists = True
                 break
 
@@ -209,3 +222,13 @@ def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company, dec
         years_period += 1
 
     return
+
+
+def update_latest_report(db, item, year, reprt_code):
+    if item.bsns_year_updated is None or item.bsns_year_updated < year:
+        item.bsns_year_updated = year
+    reprt_codes_dic = {'11011': 1, '11014': 2, '11012': 3, '11013': 4}
+    if item.reprt_code_updated is None or reprt_codes_dic[item.reprt_code_updated] >= reprt_codes_dic[
+        reprt_code]:
+        item.reprt_code_updated = reprt_code
+    db.session.commit()

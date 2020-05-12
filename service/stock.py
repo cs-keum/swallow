@@ -49,7 +49,8 @@ def configure(app):
         if yield_rate is None:
             yield_rate = 8
 
-        stock = finder.analyze_stock(db, code, int(volatility), float(yield_rate))
+        company = db.session.query(model.Company).filter(model.Company.stock_code == code).one()
+        stock = finder.analyze_stock(db, company, int(volatility), float(yield_rate))
         stocks.append(stock)
         return render_template('recommend.html',
                                stocks_recommended=json.dumps(stocks, indent=4, cls=encoder.JSONEncoder,

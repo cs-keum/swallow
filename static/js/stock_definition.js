@@ -1,15 +1,7 @@
-<!DOCTYPE HTML>
-<html>
-<head>
-    <title>Swallow app</title>
+//$(document).ready(function() {
 
-
-    <link href="https://unpkg.com/tabulator-tables@4.5.3/dist/css/tabulator.min.css" rel="stylesheet">
-    <script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.5.3/dist/js/tabulator.min.js"></script>
-    <script src="http://code.jquery.com/jquery-latest.js"></script>
-
-    <script>
-      $(document).ready(function() {
+function show_table(tabledata) {
+//$(function () {
         var table = new Tabulator(document.getElementById('example-table'), {
             height:"100%", // set height of table (in CSS or here), this enables the Virtual DOM and improves render speed dramatically (can be any valid css height value)
             layout:"fitColumns", //fit columns to width of table (optional)
@@ -18,8 +10,6 @@
                 {title:"종목명", field:"stock_name", width:100, align:"left"},
                 {title:"산업분야", field:"stock_sector", width:180},
                 {title:"산업코드", field:"industry_code", width:50},
-                {title:"사업연도", field:"applied_bsns_year", width:50},
-                {title:"보고서", field:"applied_reprt_code", width:50},
 <!--                {title:"capital_value", field:"capital_value", width:100, formatter:"money", formatterParams:{precision:false}},-->
 <!--                {title:"listed_stocks", field:"listed_stocks", width:100, formatter:"money", formatterParams:{precision:false}},-->
                 {title:"거래량", field:"trading_volume", width:80, formatter:"money", formatterParams:{precision:false}},
@@ -48,14 +38,8 @@
             },
         });
 
-        var tabledata = {{stocks_recommended|tojson}} ;
+//        var tabledata = JSON.parse(document.getElementById("data").dataset.stock);
+//        var tabledata = JSON.parse($("#data").data("stock"));
+//        var tabledata = {{stocks_recommended|tojson}} ;
         table.setData(tabledata);
-      });
-    </script>
-
-</head>
-<body>
-<!--    <h1>Hello Flask!</h1>-->
-<div id="example-table"></div>
-</body>
-</html>
+};
