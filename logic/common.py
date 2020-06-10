@@ -15,7 +15,10 @@ def company(db: SQLAlchemy, stock_code):
 
 
 def amount(item):
-    return int(item.thstrm_amount.replace(',', ''))
+    try:
+        return int(item.thstrm_amount.replace(',', ''))
+    except:
+        return None
 
 
 def revenue(db: SQLAlchemy, company_item, reprt_code):

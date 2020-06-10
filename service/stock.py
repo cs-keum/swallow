@@ -32,7 +32,11 @@ def configure(app):
         if yield_rate is None:
             yield_rate = 8
 
-        stocks = finder.recommend_stocks(db, steady_roe, int(volatility), float(yield_rate))
+        type = request.args.get('type')
+        if type is None:
+            type = 0
+
+        stocks = finder.recommend_stocks(db, steady_roe, int(volatility), float(yield_rate), int(type))
         return render_template('recommend.html',
                                stocks_recommended=json.dumps(stocks, indent=4, cls=encoder.JSONEncoder,
                                                              ensure_ascii=False))

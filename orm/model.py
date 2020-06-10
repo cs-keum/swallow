@@ -333,6 +333,7 @@ class StockDefinition(Base):
     bpr = Column(Float)
     dividend = Column(Integer)
     dividend_yield = Column(Float)
+    op_margin = Column(Float)
     roe = Column(Float)
     roes = Column(String(150))
 
@@ -340,7 +341,7 @@ class StockDefinition(Base):
                  industry_code=None, capital_value=0, applied_bsns_year=None, applied_reprt_code=None, listed_stocks=0,
                  trading_volume=0, total_market_price=0, cash_flows=0, total_market_price_cash_flows_ratio=0,
                  foreign_holding_ratio=0, excess_profit=0, price_gap_ratio=0, price=0, buy_price=0, adequate_price=0,
-                 excess_price=0, per=0, bpr=0, dividend=0, dividend_yield=0, roe=0, roes={}):
+                 excess_price=0, per=0, bpr=0, dividend=0, dividend_yield=0, op_margin=0, roe=0, roes={}):
         self.creation_datetime = creation_datetime
         self.stock_code = stock_code
         self.stock_name = stock_name
@@ -365,6 +366,7 @@ class StockDefinition(Base):
         self.bpr = bpr
         self.dividend = dividend
         self.dividend_yield = dividend_yield
+        self.op_margin = op_margin
         self.roe = roe
         self.roes = roes
 

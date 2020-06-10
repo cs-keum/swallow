@@ -227,8 +227,8 @@ def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company, dec
 def update_latest_report(db, item, year, reprt_code):
     if item.bsns_year_updated is None or item.bsns_year_updated < year:
         item.bsns_year_updated = year
-    reprt_codes_dic = {'11011': 1, '11014': 2, '11012': 3, '11013': 4}
-    if item.reprt_code_updated is None or reprt_codes_dic[item.reprt_code_updated] >= reprt_codes_dic[
+    reprt_codes_dic = {'11011': 1, '11013': 2, '11012': 3, '11014': 4}
+    if item.reprt_code_updated is None or reprt_codes_dic[item.reprt_code_updated] <= reprt_codes_dic[
         reprt_code]:
         item.reprt_code_updated = reprt_code
     db.session.commit()

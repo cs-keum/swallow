@@ -97,6 +97,22 @@ def annual_roe(db: SQLAlchemy, stock_code, performance_updated):
     return roe_dic, True
 
 
+def annual_op_margin(db: SQLAlchemy, stock_code, performance_updated):
+    op_margin_dic = {}
+
+    result = db.session.query(model.CompanyPerformance.settlement_date, model.CompanyPerformance.op_margin,
+                              model.CompanyPerformance.is_consensus).filter(
+        model.CompanyPerformance.stock_code == stock_code).filter(
+        model.CompanyPerformance.creation_date == performance_updated).filter(
+        model.CompanyPerformance.period_division == 'annual')
+
+    for item in result:
+        if item.op_margin != 0 or item.op_margin == 0 and item.is_consensus:
+            op_margin_dic[item.settlement_date] = item.op_margin
+
+    return op_margin_dic, True
+
+
 def roe_trend(roe_dic, filter_recommend, steady_roe, volatility, yield_rate):
     before_roe = -1
     trend = -1
@@ -188,23 +204,44 @@ def define_roe(trend, roe_dic, follow_trend):
 #     return value
 
 
-def define_value(db, code, stock_company, _roe, roe_dic, yield_rate, capital_value, cash_flows):
+def define_value(db, code, stock_company, _roe, roe_dic, yield_rate, capital_value, cash_flows, filter_recommend):
     if capital_value is None:
         return None
 
-    item = current_stock(db, code)
-    try:
-        price = item.current_price
-        name = item.stock_name
-        listedStocks = item.listed_stocks
-        trading_volume = item.trading_volume
-        total_market_price = item.total_market_price
-    except:
+    if cash_flows is None or cash_flows < 0:
         return None
+
+    annual_op_margin_dic, is_valid = annual_op_margin(db, stock_company.stock_code, stock_company.performance_updated)
+    _aligned_op_margin_dic = aligned_roe_dic(annual_op_margin_dic)
+    # trend = roe_trend(_ali/gned_op_margin_dic, filter_recommend, False, 0, yield_rate)
+
+    # if trend < 0:
+    #     return None
+
+    op_margin = define_roe(2, _aligned_op_margin_dic, True)
+
+    item = current_stock(db, code)
+    # try:
+    price = item.current_price
+    name = item.stock_name
+    listedStocks = item.listed_stocks
+    trading_volume = item.trading_volume
+    total_market_price = item.total_market_price
+    # except:
+    #     return None
+
+    # if filter_recommend and trading_volume < 50000:
+    #     return None
+
+    # if filter_recommend and total_market_price < 100000000000:
+    #     return None
 
     total_market_price_cash_flows_ratio = None
     if cash_flows is not None:
         total_market_price_cash_flows_ratio = round(total_market_price / cash_flows, 2)
+
+    if filter_recommend and total_market_price_cash_flows_ratio > 10:
+        return None
 
     gap_roe = _roe - yield_rate
     excessProfit = (capital_value * gap_roe / 100)
@@ -250,7 +287,7 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate, capital_val
                                              total_market_price, cash_flows, total_market_price_cash_flows_ratio,
                                              foreign_holding_ratio, excessProfit, price_gap_ratio, price,
                                              buyingStockValue, adequateStockValue, excessStockValue, per, pbr,
-                                             dividend, dividend_yield, _roe, roe_dic)
+                                             dividend, dividend_yield, op_margin, _roe, roe_dic)
     return stock_definition
 
 
@@ -264,7 +301,7 @@ def aligned_roe_dic(roe_dic):
     return _aligned_roe
 
 
-def recommend_stocks(db: SQLAlchemy, steady_roe, volatility, yield_rate):
+def recommend_stocks(db: SQLAlchemy, steady_roe, volatility, yield_rate, type):
     stocks = []
     result = common.stock_codes(db)
 
@@ -273,9 +310,17 @@ def recommend_stocks(db: SQLAlchemy, steady_roe, volatility, yield_rate):
         if stock_definition is None:
             continue
 
-        if stock_definition.price < stock_definition.buy_price:
-            # print(stock_definition.as_dict())
+        if type == 0: # ALL
             stocks.append(stock_definition)
+
+        if type == 1:
+            if stock_definition.price < stock_definition.buy_price:
+                # print(stock_definition.as_dict())
+                stocks.append(stock_definition)
+
+        if type == 2:
+            if stock_definition.buy_price <= stock_definition.price < stock_definition.adequate_price:
+                stocks.append(stock_definition)
 
     return stocks
 
@@ -298,7 +343,7 @@ def __stock(db: SQLAlchemy, company, filter_recommend, steady_roe, volatility, y
         if item is not None:
             if item.roe is not None and item.roes is not None:
                 return define_value(db, company.stock_code, company, item.roe, json.loads(item.roes), yield_rate,
-                                    item.capital_value, item.cash_flows)
+                                    item.capital_value, item.cash_flows, filter_recommend)
             else:
                 return
 
@@ -343,7 +388,7 @@ def __stock(db: SQLAlchemy, company, filter_recommend, steady_roe, volatility, y
         db.session.commit()
 
     return define_value(db, company.stock_code, company, defined_roe, _aligned_roe_dic, yield_rate, capital_value,
-                        cash_flows)
+                        cash_flows, filter_recommend)
 
 
 def handle_invalid_performance(db, company, yield_rate):
