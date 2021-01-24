@@ -211,6 +211,7 @@ class MarketCondition(Base):
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
     stock_code = Column(String(50))
     stock_name = Column(String(50))
+    gubun = Column(String(50))
     current_price = Column(Integer)
     compare = Column(Integer)
     fluctuation_rate = Column(Float)
@@ -220,14 +221,13 @@ class MarketCondition(Base):
     trading_volume = Column(Float)
     transaction_amount = Column(Float)
     total_market_price = Column(Float)
-    total_market_price_ratio = Column(Float)
     listed_stocks = Column(Float)
 
-    def __init__(self, stock_code, stock_name, current_price, compare, fluctuation_rate, market_price, high_price,
-                 low_price, trading_volume, transaction_amount, total_market_price, total_market_price_ratio,
-                 listed_stocks):
+    def __init__(self, stock_code, stock_name, gubun, current_price, compare, fluctuation_rate, market_price,
+                 high_price, low_price, trading_volume, transaction_amount, total_market_price, listed_stocks):
         self.stock_code = stock_code
         self.stock_name = stock_name
+        self.gubun = gubun;
         self.current_price = current_price
         self.compare = compare
         self.fluctuation_rate = fluctuation_rate
@@ -237,7 +237,6 @@ class MarketCondition(Base):
         self.trading_volume = trading_volume
         self.transaction_amount = transaction_amount
         self.total_market_price = total_market_price
-        self.total_market_price_ratio = total_market_price_ratio
         self.listed_stocks = listed_stocks
 
     def as_dict(self):
@@ -274,10 +273,9 @@ class InvestReference(Base):
     __table_args__ = {'mysql_collate': 'utf8_general_ci'}
 
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
-    tdate = Column(Date)
+    # tdate = Column(Date)
     stock_code = Column(String(50))
     stock_name = Column(String(50))
-    managed = Column(String(10))
     price = Column(Integer)
     eps = Column(Float)
     per = Column(Float)
@@ -286,12 +284,11 @@ class InvestReference(Base):
     dividend = Column(Integer)
     dividend_yield = Column(Integer)
 
-    def __init__(self, tdate, stock_code, stock_name, managed, price, eps, per, bps, pbr, dividend,
+    def __init__(self, stock_code, stock_name, price, eps, per, bps, pbr, dividend,
                  dividend_yield):
-        self.tdate = tdate
+        # self.tdate = tdate
         self.stock_code = stock_code
         self.stock_name = stock_name
-        self.managed = managed
         self.price = price
         self.eps = eps
         self.per = per

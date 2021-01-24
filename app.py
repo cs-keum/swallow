@@ -89,7 +89,7 @@ def main():
 
     collector.krx_market_condition(args_list[0])
     collector.krx_invest_reference(args_list[0])
-    collector.krx_foreign_holding(args_list[0])
+    # collector.krx_foreign_holding(args_list[0])
 
     scheduler = BackgroundScheduler()
     scheduler.add_job(func=collector.krx_market_condition, trigger='interval', args=args_list, seconds=20*60)

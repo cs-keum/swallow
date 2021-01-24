@@ -168,7 +168,7 @@ def equity_owners_value(db, company_item, bsns_year, reprt_code):
     if non_controlling_interests_item.count() > 0:
         try:
             return amount(total_capital_item.first()) - amount(non_controlling_interests_item.first())
-        except ValueError:
+        except:
             pass
     else:
         return amount(total_capital_item.first())

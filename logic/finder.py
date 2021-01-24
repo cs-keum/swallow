@@ -113,6 +113,25 @@ def annual_op_margin(db: SQLAlchemy, stock_code, performance_updated):
     return op_margin_dic, True
 
 
+def define_roe(trend, roe_dic, follow_trend):
+    # trend = 0 : increase trend
+    # trend = 1 : decrease trend
+    if follow_trend:
+        if trend == 0 or trend == 1:
+            return roe_dic.get(0)
+
+    # trend = 2 : mixed trend
+    roe_sum = 0
+    divide_var = 0
+    for key in roe_dic.keys():
+        weight_roe = roe_dic.get(key) * (len(roe_dic) - key)
+        roe_sum += weight_roe
+        divide_var += (len(roe_dic) - key)
+    if divide_var == 0:
+        return -1
+    return round(roe_sum / divide_var, 3)
+
+
 def roe_trend(roe_dic, filter_recommend, steady_roe, volatility, yield_rate):
     before_roe = -1
     trend = -1
@@ -129,9 +148,9 @@ def roe_trend(roe_dic, filter_recommend, steady_roe, volatility, yield_rate):
         if cur_roe is None:
             return -1
 
-        if filter_recommend:
-            if cur_roe < yield_rate:
-                return -1
+        # if filter_recommend:
+        #     if cur_roe < yield_rate:
+        #         return -1
 
         # if before_roe > 0:
         if steady_roe:
@@ -163,25 +182,6 @@ def roe_trend(roe_dic, filter_recommend, steady_roe, volatility, yield_rate):
         before_roe = cur_roe
 
     return trend
-
-
-def define_roe(trend, roe_dic, follow_trend):
-    # trend = 0 : increase trend
-    # trend = 1 : decrease trend
-    if follow_trend:
-        if trend == 0 or trend == 1:
-            return roe_dic.get(0)
-
-    # trend = 2 : mixed trend
-    roe_sum = 0
-    divide_var = 0
-    for key in roe_dic.keys():
-        weight_roe = roe_dic.get(key) * (len(roe_dic) - key)
-        roe_sum += weight_roe
-        divide_var += (len(roe_dic) - key)
-    if divide_var == 0:
-        return -1
-    return round(roe_sum / divide_var, 3)
 
 
 # def xbrl_capital_value(code):
@@ -221,14 +221,14 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate, capital_val
     op_margin = define_roe(2, _aligned_op_margin_dic, True)
 
     item = current_stock(db, code)
-    # try:
-    price = item.current_price
-    name = item.stock_name
-    listedStocks = item.listed_stocks
-    trading_volume = item.trading_volume
-    total_market_price = item.total_market_price
-    # except:
-    #     return None
+    try:
+        price = item.current_price
+        name = item.stock_name
+        listedStocks = item.listed_stocks
+        trading_volume = item.trading_volume
+        total_market_price = item.total_market_price
+    except:
+        return None
 
     # if filter_recommend and trading_volume < 50000:
     #     return None
@@ -296,7 +296,8 @@ def aligned_roe_dic(roe_dic):
 
     roe_tuple_list = sorted(roe_dic.items(), key=operator.itemgetter(0), reverse=True)
     for index, roe_tuple in enumerate(roe_tuple_list):
-        _aligned_roe[index] = roe_tuple[1]
+        if index < 3:
+            _aligned_roe[index] = roe_tuple[1]
 
     return _aligned_roe
 
@@ -310,7 +311,7 @@ def recommend_stocks(db: SQLAlchemy, steady_roe, volatility, yield_rate, type):
         if stock_definition is None:
             continue
 
-        if type == 0: # ALL
+        if type == 0:  # ALL
             stocks.append(stock_definition)
 
         if type == 1:
@@ -320,6 +321,10 @@ def recommend_stocks(db: SQLAlchemy, steady_roe, volatility, yield_rate, type):
 
         if type == 2:
             if stock_definition.buy_price <= stock_definition.price < stock_definition.adequate_price:
+                stocks.append(stock_definition)
+
+        if type == 3:
+            if stock_definition.adequate_price <= stock_definition.price < stock_definition.excess_price:
                 stocks.append(stock_definition)
 
     return stocks

@@ -7,17 +7,26 @@ from io import BytesIO
 
 
 def stock_market_condition(trade_date):
-    req_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+    req_url = 'http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd'
     params = {
         'name': 'fileDown',
         'filetype': 'xls',
-        'url': 'MKD/13/1302/13020101/mkd13020101',
+        'url': 'dbms/MDC/STAT/standard/MDCSTAT01501',
         'market_gubun': 'ALL',
         'sect_tp_cd': 'ALL',
-        'schdate': str(trade_date),
+        'trdDd': str(trade_date),
+        # 'trdDd': str(20210122),
+        'mktId': 'ALL',
+        'share': 1,
+        'money': 1,
+        'csvxls_isNo': 'false',
         'pagePath': '/contents/MKD/13/1302/13020101/MKD13020101.jsp'
     }
-    r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'swallow'})
+    headers = {
+        'Referer': 'http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201',
+        'User-Agent': 'swallow'
+    }
+    r1 = requests.get(url=req_url, params=params, headers=headers)
 
     doTry = 0
     while len(r1.content) <= 0:
@@ -26,9 +35,9 @@ def stock_market_condition(trade_date):
         if doTry == 10:
             break
 
-    req_url = 'http://file.krx.co.kr/download.jspx'
+    req_url = 'http://data.krx.co.kr/comm/fileDn/download_excel/download.cmd'
     headers = {
-        'Referer': 'http://marketdata.krx.co.kr/mdi',
+        'Referer': 'http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201',
         'User-Agent': 'swallow'
     }
     data = {
@@ -50,43 +59,52 @@ def stock_market_condition(trade_date):
 
     df = pd.read_excel(BytesIO(r.content), thousands=',')
 
-    df.columns = ["stock_code", "stock_name", "current_price", "compare", "fluctuation_rate", "market_price",
-                  "high_price",
-                  "low_price", "trading_volume", "transaction_amount", "total_market_price", "total_market_price_ratio",
+    if df.iloc[0, 4] == "-":
+        return None;
+
+    df.columns = ["stock_code", "stock_name", "gubun", "sosok", "current_price", "compare", "fluctuation_rate",
+                  "market_price",
+                  "high_price", "low_price", "trading_volume", "transaction_amount", "total_market_price",
                   "listed_stocks"]
     return df
 
 
 def invest_reference(trade_date):
-    req_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+    req_url = 'http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd'
     params = {
+        'searchType': 1,
+        'mktId': 'ALL',
+        'trdDd': str(trade_date),
+        # 'trdDd': str(20210122),
+        'tboxisuCd_finder_stkisu0_0': '005930 / 삼성전자',
+        'isuCd': 'KR7005930003',
+        'isuCd2': 'KR7005930003',
+        'codeNmisuCd_finder_stkisu0_0': '삼성전자',
+        'param1isuCd_finder_stkisu0_0': 'STK',
+        'strtDd': '20200103',
+        'endDd': '20200110',
         'name': 'fileDown',
         'filetype': 'xls',
-        'url': 'MKD/13/1302/13020401/mkd13020401',
-        'market_gubun': 'ALL',
-        'gubun': '1',
-        'isu_cdnm': 'A005930/삼성전자',
-        'isu_cd': 'KR7005930003',
-        'isu_nm': '삼성전자',
-        'isu_srt_cd': 'A005930',
-        'schdate': str(trade_date),
-        'fromdate': '20200103',
-        'todate': '20200110',
-        'pagePath': '/contents/MKD/13/1302/13020401/MKD13020401.jsp'
+        'url': 'dbms/MDC/STAT/standard/MDCSTAT03501',
+        'gubun': '1'
     }
-    r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'swallow'})
+    headers = {
+        'Referer': 'http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020502',
+        'User-Agent': 'swallow'
+    }
+    r1 = requests.get(url=req_url, params=params, headers=headers)
 
     doTry = 0
     while len(r1.content) <= 0:
         time.sleep(2.0)
-        r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'swallow'})
+        r1 = requests.get(url=req_url, params=params, headers=headers)
         doTry += 1
         if doTry == 10:
             break
 
-    req_url = 'http://file.krx.co.kr/download.jspx'
+    req_url = 'http://data.krx.co.kr/comm/fileDn/download_excel/download.cmd'
     headers = {
-        'Referer': 'http://marketdata.krx.co.kr/mdi',
+        'Referer': 'http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020502',
         'User-Agent': 'swallow'
     }
     data = {
@@ -108,17 +126,21 @@ def invest_reference(trade_date):
 
     df = pd.read_excel(BytesIO(r.content), thousands=',')
 
-    df.columns = ["tdate", "stock_code", "stock_name", "managed", "price", "eps", "per", "bps", "pbr", "dividend",
+    df.columns = ["stock_code", "stock_name", "price", "compare", "fluctuation_rate", "eps", "per", "bps", "pbr",
+                  "dividend",
                   "dividend_yield"]
 
-    df['tdate'] = df['tdate'].str.replace('/', '')
+    if df.iloc[0, 2] == "-":
+        return None;
+    # df.insert(column='stock_code', value=str(trade_date))
+    # df['tdate'] = df['tdate'].str.replace('/', '')
     df['eps'] = df['eps'].apply(lambda x: '0' if x == "-" else x)
     df['per'] = df['per'].apply(lambda x: '0' if x == "-" else x)
     df['bps'] = df['bps'].apply(lambda x: '0' if x == "-" else x)
     df['pbr'] = df['pbr'].apply(lambda x: '0' if x == "-" else x)
 
-    df['dividend'] = df['dividend'].apply(lambda x: '0' if x == np.inf or np.isnan(x) else x)
-    df['dividend_yield'] = df['dividend_yield'].apply(lambda x: '0' if x == np.inf or np.isnan(x) else x)
+    df['dividend'] = df['dividend'].apply(lambda x: '0' if x == np.inf else x)
+    df['dividend_yield'] = df['dividend_yield'].apply(lambda x: '0' if x == np.inf else x)
     df.fillna(0)
     return df
 
@@ -175,34 +197,45 @@ def industry_type():
 
 
 def foreign_holding(trade_date):
-    req_url = 'http://marketdata.krx.co.kr/contents/COM/GenerateOTP.jspx'
+    req_url = 'http://data.krx.co.kr/comm/fileDn/GenerateOTP/generate.cmd'
     params = {
+        'searchType': 1,
+        'mktId': 'ALL',
+        'trdDd': str(trade_date),
+        # 'trdDd': str(20210122),
+        'tboxisuCd_finder_stkisu0_1': '005930/삼성전자',
+        'isuCd': 'KR7005930003',
+        'isuCd2': 'KR7005930003',
+        'codeNmisuCd_finder_stkisu0_1': '삼성전자',
+        'param1isuCd_finder_stkisu0_1': 'STK',
+        'strtDd': '20210115',
+        'endDd': '20210122',
+        'share': 1,
+        'csvxls_isNo': 'false',
         'name': 'fileDown',
-        'filetype': 'xls',
-        'url': 'MKD/13/1302/13020402/mkd13020402',
-        'market_gubun': 'ALL',
-        'lmt_tp': 1,
-        'sect_tp_cd': 'ALL',
-        'schdate': str(trade_date),
-        'pagePath': '/contents/MKD/13/1302/13020402/MKD13020402.jsp'
+        'url': 'dbms/MDC/STAT/standard/MDCSTAT03701'
     }
-    r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'test'})
+    headers = {
+        'Referer': 'http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020502',
+        'User-Agent': 'swallow'
+    }
+    r1 = requests.get(url=req_url, params=params, headers=headers)
 
     # print("기본 데이터 가져오기 중 ...")
 
     doTry = 0
     while len(r1.content) <= 0:
         time.sleep(2.0)
-        r1 = requests.get(url=req_url, params=params, headers={'User-Agent': 'test'})
+        r1 = requests.get(url=req_url, params=params, headers=headers)
         doTry += 1
         # print("기본 데이터 가져오기 중 ...", doTry)
         if doTry == 10:
             break
 
-    req_url = 'http://file.krx.co.kr/download.jspx'
+    req_url = 'http://data.krx.co.kr/comm/fileDn/download_excel/download.cmd'
     headers = {
-        'Referer': 'http://marketdata.krx.co.kr/mdi',
-        'User-Agent': 'test'
+        'Referer': 'http://data.krx.co.kr/contents/MDC/MDI/mdiLoader/index.cmd?menuId=MDC0201020502',
+        'User-Agent': 'swallow'
     }
     data = {
         'code': r1.content
@@ -222,8 +255,12 @@ def foreign_holding(trade_date):
 
     df = pd.read_excel(BytesIO(r.content), thousands=',')
 
-    df.columns = ["stock_code", "stock_name", "listed_stocks", "foreign_holding_limit", "foreign_holding",
-                  "foreign_holding_ratio"]
+    df.columns = ["stock_code", "stock_name", "price", "compare", "fluctuation_rate", "listed_stocks",
+                  "foreign_holding", "foreign_holding_ratio", "foreign_holding_limit", "foreign_holding_limit_exhaust"]
+
+    if df.iloc[0, 2] == "-":
+        return None;
+
     return df
 
 # def stock(date):

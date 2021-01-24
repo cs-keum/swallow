@@ -18,7 +18,7 @@ def nfinance_company_performance(db: SQLAlchemy):
         exist_data = db.session.query(exists().where(model.CompanyPerformance.stock_code == item.stock_code).where(
             model.CompanyPerformance.creation_date == datetime.today().date())).scalar()
         if not exist_data:
-            time.sleep(1.0)
+            time.sleep(0.4)
             df = nfinance.company_performance(item.stock_code)
             if df.size <= 0:
                 company_performance_item = model.CompanyPerformance(stock_code=item.stock_code,
@@ -43,7 +43,7 @@ def krx_market_condition(db: SQLAlchemy):
     trade_date = datetime.today()
     while True:
         df = krx.stock_market_condition(trade_date.strftime("%Y%m%d"))
-        if df.size != 0:
+        if df is not None and df.size != 0:
             db.session.query(model.MarketCondition).delete()
             db.session.bulk_insert_mappings(model.MarketCondition, df.to_dict(orient="records"))
             db.session.commit()
@@ -58,7 +58,7 @@ def krx_invest_reference(db: SQLAlchemy):
     trade_date = datetime.today()
     while True:
         df = krx.invest_reference(trade_date.strftime("%Y%m%d"))
-        if df.size != 0:
+        if df is not None and df.size != 0:
             db.session.query(model.InvestReference).delete()
             db.session.bulk_insert_mappings(model.InvestReference, df.to_dict(orient="records"))
             db.session.commit()
@@ -89,7 +89,7 @@ def krx_foreign_holding(db: SQLAlchemy):
     trade_date = datetime.today()
     while True:
         df = krx.foreign_holding(trade_date.strftime("%Y%m%d"))
-        if df.size != 0:
+        if df is not None and df.size != 0:
             db.session.query(model.ForeignHolding).delete()
             db.session.bulk_insert_mappings(model.ForeignHolding, df.to_dict(orient="records"))
             db.session.commit()
