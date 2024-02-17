@@ -6,7 +6,6 @@ from logic import collector
 
 
 def configure(app):
-
     @app.route('/crawling/nfinance/companyperformance')
     def nfinance_company_performance(db: SQLAlchemy):
 

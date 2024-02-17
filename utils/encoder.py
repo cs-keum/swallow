@@ -8,6 +8,9 @@ from orm import model
 class JSONEncoder(json.JSONEncoder):
 
     def default(self, o):
+        if isinstance(o, model.BaseCompany):
+            return o.as_dict()
+
         if isinstance(o, model.Company):
             return o.as_dict()
 

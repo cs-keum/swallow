@@ -230,11 +230,11 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate, capital_val
     except:
         return None
 
-    # if filter_recommend and trading_volume < 50000:
-    #     return None
+    if filter_recommend and trading_volume < 50000:
+        return None
 
-    # if filter_recommend and total_market_price < 100000000000:
-    #     return None
+    if filter_recommend and total_market_price < 100000000000:
+        return None
 
     total_market_price_cash_flows_ratio = None
     if cash_flows is not None:
@@ -281,9 +281,8 @@ def define_value(db, code, stock_company, _roe, roe_dic, yield_rate, capital_val
         dividend = ir.dividend
         dividend_yield = ir.dividend_yield
 
-    stock_definition = model.StockDefinition(datetime.today().strftime('%Y-%m-%d'), code, name, stock_company.sector,
-                                             stock_company.induty_code, capital_value, stock_company.bsns_year_updated,
-                                             stock_company.reprt_code_updated, listedStocks, trading_volume,
+    stock_definition = model.StockDefinition(datetime.today().strftime('%Y-%m-%d'), code, name, capital_value,
+                                             listedStocks, trading_volume,
                                              total_market_price, cash_flows, total_market_price_cash_flows_ratio,
                                              foreign_holding_ratio, excessProfit, price_gap_ratio, price,
                                              buyingStockValue, adequateStockValue, excessStockValue, per, pbr,
@@ -307,6 +306,7 @@ def recommend_stocks(db: SQLAlchemy, steady_roe, volatility, yield_rate, type):
     result = common.stock_codes(db)
 
     for company in result:
+        company.reprt_code_updated = '11014'
         stock_definition = recommend_stock(db, company, steady_roe, volatility, yield_rate)
         if stock_definition is None:
             continue
@@ -339,20 +339,21 @@ def recommend_stock(db: SQLAlchemy, company, steady_roe, volatility, yield_rate)
 
 
 def __stock(db: SQLAlchemy, company, filter_recommend, steady_roe, volatility, yield_rate):
-    if filter_recommend:
-        item = db.session.query(model.CompanyPresumed).filter(
-            model.CompanyPresumed.stock_code == company.stock_code).filter(
-            model.CompanyPresumed.performance_updated == company.performance_updated).filter(
-            model.CompanyPresumed.yield_rate == yield_rate).first()
-
-        if item is not None:
-            if item.roe is not None and item.roes is not None:
-                return define_value(db, company.stock_code, company, item.roe, json.loads(item.roes), yield_rate,
-                                    item.capital_value, item.cash_flows, filter_recommend)
-            else:
-                return
+    # if filter_recommend:
+    #     item = db.session.query(model.CompanyPresumed).filter(
+    #         model.CompanyPresumed.stock_code == company.stock_code).filter(
+    #         model.CompanyPresumed.performance_updated == company.performance_updated).filter(
+    #         model.CompanyPresumed.yield_rate == yield_rate).first()
+    #
+    #     if item is not None:
+    #         if item.roe is not None and item.roes is not None:
+    #             return define_value(db, company.stock_code, company, item.roe, json.loads(item.roes), yield_rate,
+    #                                 item.capital_value, item.cash_flows, filter_recommend)
+    #         else:
+    #             return
 
     roe_dic = {}
+
     annual_roe_dic, is_valid = annual_roe(db, company.stock_code, company.performance_updated)
     if not is_valid:
         # return None
@@ -384,7 +385,7 @@ def __stock(db: SQLAlchemy, company, filter_recommend, steady_roe, volatility, y
         return handle_invalid_performance(db, company, yield_rate)
 
     capital_value = common.equity_owners_value(db, company, company.bsns_year_updated, company.reprt_code_updated)
-    cash_flows = common.cash_flows(db, company, '11011')
+    cash_flows = common.cash_flows(db, company, company.reprt_code_updated)
 
     if filter_recommend:
         company_presumed = model.CompanyPresumed(company.stock_code, company.performance_updated, yield_rate,

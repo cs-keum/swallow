@@ -18,7 +18,7 @@ def nfinance_company_performance(db: SQLAlchemy):
         exist_data = db.session.query(exists().where(model.CompanyPerformance.stock_code == item.stock_code).where(
             model.CompanyPerformance.creation_date == datetime.today().date())).scalar()
         if not exist_data:
-            time.sleep(0.4)
+            time.sleep(0.1)
             df = nfinance.company_performance(item.stock_code)
             if df.size <= 0:
                 company_performance_item = model.CompanyPerformance(stock_code=item.stock_code,
@@ -33,7 +33,7 @@ def nfinance_company_performance(db: SQLAlchemy):
         else:
             print("exist [" + item.stock_code + "] company performance data")
 
-        company_item = db.session.query(model.Company).filter(model.Company.stock_code == item.stock_code).one()
+        company_item = db.session.query(model.BaseCompany).filter(model.BaseCompany.stock_code == item.stock_code).one()
         company_item.performance_updated = datetime.today().date()
         db.session.commit()
     return
@@ -100,15 +100,26 @@ def krx_foreign_holding(db: SQLAlchemy):
     return
 
 
+def dart_all_company(db: SQLAlchemy):
+
+    dart.company_data(db)
+    return
+
 def dart_financial_data(db: SQLAlchemy, initial):
-    result = common.stock_codes(db)
+    # result = common.stock_codes(db)
+
+    # 2023 / 11014 가 아닌 애들만
+    result = db.session.query(model.BaseCompany).filter(
+        model.BaseCompany.bsns_year_updated != 2023,
+        model.BaseCompany.reprt_code_updated != '11014'
+    ).all()
 
     for item in result:
         if not initial and not db.session.query(
                 exists().where(model.FinancialData.corp_code == item.corp_code)).scalar():
             continue
 
-        if request_dart_annual_financial_data(db, item):
+        if not request_dart_annual_financial_data(db, item):
             request_dart_quarter_financial_data(db, item, None, None)
 
     return
@@ -128,7 +139,7 @@ def dart_decided_period_financial_data(db: SQLAlchemy, initial, decided_year, de
     return
 
 
-def request_dart_annual_financial_data(db: SQLAlchemy, item: model.Company):
+def request_dart_annual_financial_data(db: SQLAlchemy, item: model.BaseCompany):
     bsns_year = datetime.today().year - 1
 
     # 사업보고서
@@ -163,7 +174,7 @@ def request_dart_annual_financial_data(db: SQLAlchemy, item: model.Company):
         if df is not None:
             db.session.bulk_insert_mappings(model.FinancialData, df.to_dict(orient="records"))
             db.session.commit()
-            print("Success to get data", item.stock_code, item.stock_name, year)
+            print("Success to get data", item.stock_code, item.corp_name, year)
             update_latest_report(db, item, year, reprt_code)
             exists_annual_data = True
 
@@ -172,7 +183,9 @@ def request_dart_annual_financial_data(db: SQLAlchemy, item: model.Company):
     return exists_annual_data
 
 
-def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company, decided_year, decided_reprt_code):
+REPRT_CODES_DIC = {'11011': 1, '11013': 2, '11012': 3, '11014': 4}
+
+def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.BaseCompany, decided_year, decided_reprt_code):
     bsns_year = datetime.today().year
 
     # 최근 분기보고서
@@ -182,7 +195,7 @@ def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company, dec
         years_period = 0
 
     data_exists = False
-    while years_period <= 5:
+    while years_period <= 2:
 
         year = bsns_year - years_period
 
@@ -211,13 +224,13 @@ def request_dart_quarter_financial_data(db: SQLAlchemy, item: model.Company, dec
             if df is not None:
                 db.session.bulk_insert_mappings(model.FinancialData, df.to_dict(orient="records"))
                 db.session.commit()
-                print("Success to get data", item.stock_code, item.stock_name, year, reprt_code)
+                print("Success to get data", item.stock_code, item.corp_name, year, reprt_code)
                 update_latest_report(db, item, year, reprt_code)
                 data_exists = True
                 break
 
         if data_exists:
-            break;
+            break
 
         years_period += 1
 

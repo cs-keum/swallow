@@ -5,7 +5,7 @@ from orm import model
 
 
 def stock_codes(db: SQLAlchemy):
-    results = db.session.query(model.Company)
+    results = db.session.query(model.BaseCompany)
     return results
 
 

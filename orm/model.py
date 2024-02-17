@@ -4,6 +4,21 @@ from sqlalchemy.ext.declarative import declarative_base
 Base = declarative_base()
 
 
+class BaseCompany(Base):
+    __tablename__ = 'base_company'
+    __table_args__ = {'mysql_collate': 'utf8_general_ci'}
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    corp_code = Column(String(8))
+    corp_name = Column(String(100))
+    stock_code = Column(String(6))
+    modify_date = Column(Date)
+    sector = Column(String(100), nullable=True)
+    performance_updated = Column(Date, nullable=True)
+    bsns_year_updated = Column(Integer, nullable=True)
+    reprt_code_updated = Column(String(50), nullable=True)
+
+
 class Company(Base):
     __tablename__ = 'company'
     __table_args__ = {'mysql_collate': 'utf8_general_ci'}
@@ -11,50 +26,50 @@ class Company(Base):
     id = Column(Integer, primary_key=True, unique=True, autoincrement=True)  # primary key for event table
     corp_code = Column(String(8))
     corp_name = Column(String(50))
-    corp_name_eng = Column(String(100))
-    stock_name = Column(String(50))
+    corp_name_eng = Column(String(100), nullable=True)
+    stock_name = Column(String(50), nullable=True)
     stock_code = Column(String(6))
-    ceo_nm = Column(String(150))
-    corp_cls = Column(String(1))
-    jurir_no = Column(String(50))
-    bizr_no = Column(String(50))
-    adres = Column(String(100))
-    hm_url = Column(String(50))
-    ir_url = Column(String(100))
-    phn_no = Column(String(50))
-    fax_no = Column(String(50))
-    induty_code = Column(String(10))
-    est_dt = Column(Date)
-    acc_mt = Column(String(10))
-    sector = Column(String(100))
-    performance_updated = Column(Date)
-    bsns_year_updated = Column(Integer)
-    reprt_code_updated = Column(String(50))
+    ceo_nm = Column(String(150), nullable=True)
+    corp_cls = Column(String(1), nullable=True)
+    jurir_no = Column(String(50), nullable=True)
+    bizr_no = Column(String(50), nullable=True)
+    adres = Column(String(100), nullable=True)
+    hm_url = Column(String(50), nullable=True)
+    ir_url = Column(String(100), nullable=True)
+    phn_no = Column(String(50), nullable=True)
+    fax_no = Column(String(50), nullable=True)
+    induty_code = Column(String(10), nullable=True)
+    est_dt = Column(Date, nullable=True)
+    acc_mt = Column(String(10), nullable=True)
+    sector = Column(String(100), nullable=True)
+    performance_updated = Column(Date, nullable=True)
+    bsns_year_updated = Column(Integer, nullable=True)
+    reprt_code_updated = Column(String(50), nullable=True)
 
-    def __init__(self, corp_code, corp_name, corp_name_eng, stock_name, stock_code, ceo_nm, corp_cls, jurir_no,
-                 bizr_no, address, hm_url, ir_url, phn_no, fax_no, industry_code, est_dt, acc_mt, sector,
-                 performance_updated, bsns_year_updated, reprt_code_updated):
-        self.corp_code = corp_code
-        self.corp_name = corp_name
-        self.corp_name_eng = corp_name_eng
-        self.stock_name = stock_name
-        self.stock_code = stock_code
-        self.ceo_nm = ceo_nm
-        self.corp_cls = corp_cls
-        self.jurir_no = jurir_no
-        self.bizr_no = bizr_no
-        self.address = address
-        self.hm_url = hm_url
-        self.ir_url = ir_url
-        self.phn_no = phn_no
-        self.fax_no = fax_no
-        self.industry_code = industry_code
-        self.est_dt = est_dt
-        self.acc_mt = acc_mt
-        self.sector = sector
-        self.performance_updated = performance_updated
-        self.bsns_year_updated = bsns_year_updated
-        self.reprt_code_updated = reprt_code_updated
+    # def __init__(self, corp_code, corp_name, corp_name_eng, stock_name, stock_code, ceo_nm, corp_cls, jurir_no,
+    #              bizr_no, address, hm_url, ir_url, phn_no, fax_no, industry_code, est_dt, acc_mt, sector,
+    #              performance_updated, bsns_year_updated, reprt_code_updated):
+    #     self.corp_code = corp_code
+    #     self.corp_name = corp_name
+    #     self.corp_name_eng = corp_name_eng
+    #     self.stock_name = stock_name
+    #     self.stock_code = stock_code
+    #     self.ceo_nm = ceo_nm
+    #     self.corp_cls = corp_cls
+    #     self.jurir_no = jurir_no
+    #     self.bizr_no = bizr_no
+    #     self.address = address
+    #     self.hm_url = hm_url
+    #     self.ir_url = ir_url
+    #     self.phn_no = phn_no
+    #     self.fax_no = fax_no
+    #     self.industry_code = industry_code
+    #     self.est_dt = est_dt
+    #     self.acc_mt = acc_mt
+    #     self.sector = sector
+    #     self.performance_updated = performance_updated
+    #     self.bsns_year_updated = bsns_year_updated
+    #     self.reprt_code_updated = reprt_code_updated
 
     def as_dict(self):
         return {x.name: getattr(self, x.name) for x in self.__table__.columns}
@@ -309,11 +324,11 @@ class StockDefinition(Base):
     creation_datetime = Column(DateTime)
     stock_code = Column(String(50))
     stock_name = Column(String(50))
-    stock_sector = Column(String(50))
-    industry_code = Column(String(10))
+    # stock_sector = Column(String(50))
+    # industry_code = Column(String(10))
     capital_value = Column(Integer)
-    applied_bsns_year = Column(Integer)
-    applied_reprt_code = Column(String(50))
+    # applied_bsns_year = Column(Integer)
+    # applied_reprt_code = Column(String(50))
     listed_stocks = Column(Integer)
     trading_volume = Column(Integer)
     total_market_price = Column(Integer)
@@ -334,19 +349,14 @@ class StockDefinition(Base):
     roe = Column(Float)
     roes = Column(String(150))
 
-    def __init__(self, creation_datetime=None, stock_code=None, stock_name=None, stock_sector=None,
-                 industry_code=None, capital_value=0, applied_bsns_year=None, applied_reprt_code=None, listed_stocks=0,
+    def __init__(self, creation_datetime=None, stock_code=None, stock_name=None, capital_value=0, listed_stocks=0,
                  trading_volume=0, total_market_price=0, cash_flows=0, total_market_price_cash_flows_ratio=0,
                  foreign_holding_ratio=0, excess_profit=0, price_gap_ratio=0, price=0, buy_price=0, adequate_price=0,
                  excess_price=0, per=0, bpr=0, dividend=0, dividend_yield=0, op_margin=0, roe=0, roes={}):
         self.creation_datetime = creation_datetime
         self.stock_code = stock_code
         self.stock_name = stock_name
-        self.stock_sector = stock_sector
-        self.industry_code = industry_code
         self.capital_value = capital_value
-        self.applied_bsns_year = applied_bsns_year
-        self.applied_reprt_code = applied_reprt_code
         self.listed_stocks = listed_stocks
         self.trading_volume = trading_volume
         self.total_market_price = total_market_price

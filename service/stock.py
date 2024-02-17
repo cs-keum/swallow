@@ -14,7 +14,7 @@ from logic import finder
 from logic import inspector
 from utils import encoder
 
-from hts import kiwoom
+# from hts import kiwoom
 
 
 def configure(app):
@@ -53,7 +53,9 @@ def configure(app):
         if yield_rate is None:
             yield_rate = 8
 
-        company = db.session.query(model.Company).filter(model.Company.stock_code == code).one()
+        company = db.session.query(model.BaseCompany).filter(model.BaseCompany.stock_code == code).one()
+        company.reprt_code_updated = '11014'
+
         stock = finder.analyze_stock(db, company, int(volatility), float(yield_rate))
         stocks.append(stock)
         return render_template('recommend.html',

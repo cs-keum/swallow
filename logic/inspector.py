@@ -83,7 +83,7 @@ def analyze_risk(db: SQLAlchemy, stock_code):
     return Inspection(company_item, risk_results)
 
 
-def analyze_revenue_risk(db: SQLAlchemy, company_item: model.Company, results: []):
+def analyze_revenue_risk(db: SQLAlchemy, company_item: model.BaseCompany, results: []):
     if company_item.corp_cls == 'Y':
         standard_amount = 5000000000  # 50억
     elif company_item.corp_cls == 'K':
@@ -121,7 +121,7 @@ def analyze_revenue_risk(db: SQLAlchemy, company_item: model.Company, results: [
     return results
 
 
-def analyze_business_loss_risk(db: SQLAlchemy, company_item: model.Company, results: []):
+def analyze_business_loss_risk(db: SQLAlchemy, company_item: model.BaseCompany, results: []):
     if company_item.corp_cls == 'Y':
         risk_result = RiskResult(risk_type=Risk.BUSINESS_LOSS)
         risk_result.is_normal = None
@@ -175,7 +175,7 @@ def analyze_business_loss_risk(db: SQLAlchemy, company_item: model.Company, resu
     return results
 
 
-def analyze_operating_loss_risk(db: SQLAlchemy, company_item: model.Company, results: []):
+def analyze_operating_loss_risk(db: SQLAlchemy, company_item: model.BaseCompany, results: []):
     if company_item.corp_cls == 'Y':
         risk_result = RiskResult(risk_type=Risk.OPERATING_LOSS)
         risk_result.is_normal = None
@@ -215,7 +215,7 @@ def analyze_operating_loss_risk(db: SQLAlchemy, company_item: model.Company, res
     return results
 
 
-def analyze_capital_impairment_risk(db: SQLAlchemy, company_item: model.Company, results: []):
+def analyze_capital_impairment_risk(db: SQLAlchemy, company_item: model.BaseCompany, results: []):
     # 자본금
     result = common.issued_capital(db, company_item, '11011')
     result_count = result.count()

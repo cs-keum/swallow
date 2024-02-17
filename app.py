@@ -13,7 +13,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
-from hts import kiwoom
+# from hts import kiwoom
 
 from logic import collector
 
@@ -87,19 +87,22 @@ def main():
     bind_db = injector.binder.get_binding(SQLAlchemy)
     args_list = [bind_db[0].provider.get(injector)]
 
+    # DART에 등록되어있는 공시대상회사의 고유번호,회사명,종목코드, 최근변경일자를 파일로 제공합니다
+
     collector.krx_market_condition(args_list[0])
+    collector.dart_all_company(args_list[0])
     collector.krx_invest_reference(args_list[0])
     # collector.krx_foreign_holding(args_list[0])
 
     scheduler = BackgroundScheduler()
-    scheduler.add_job(func=collector.krx_market_condition, trigger='interval', args=args_list, seconds=20*60)
+    scheduler.add_job(func=collector.krx_market_condition, trigger='interval', args=args_list, seconds=20 * 60)
     scheduler.start()
 
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.run(port=9090)
     # client = app.test_client()
 
-        # response = client.get('/crawling/nfinance/companyperformance')
+    # response = client.get('/crawling/nfinance/companyperformance')
     # response = client.get('/crawling/dart/financialdata')
     # response = client.get('/crawling/krx/investratio')
     # response = client.get('/crawling/krx/marketcondition')

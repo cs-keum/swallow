@@ -126,7 +126,7 @@ def invest_reference(trade_date):
 
     df = pd.read_excel(BytesIO(r.content), thousands=',')
 
-    df.columns = ["stock_code", "stock_name", "price", "compare", "fluctuation_rate", "eps", "per", "bps", "pbr",
+    df.columns = ["stock_code", "stock_name", "price", "compare", "fluctuation_rate", "eps", "per", "e_eps", "e_per", "bps", "pbr",
                   "dividend",
                   "dividend_yield"]
 
